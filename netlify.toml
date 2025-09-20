@@ -18,29 +18,6 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
 
 # Secrets scanning configuration
-[build.processing]
-  secrets = [
-    { omit_keys = [
-        "VITE_HR_MASTER",
-        "VITE_SERVICE_ID",
-        "VITE_TEMPLATE_ID",
-        "VITE_PUBLIC_KEY"
-      ]
-    },
-    { omit_paths = [
-        "dist",
-        "dist/*",
-        "dist/**/*",
-        "dist/assets",
-        "dist/assets/*",
-        "dist/assets/**/*",
-        ".env*",
-        "node_modules"
-      ]
-    }
-  ]
-
-# Alternative secrets scanning configuration (if the above doesn't work)
 [build.processing.secrets]
   enabled = true
   omit_keys = [
