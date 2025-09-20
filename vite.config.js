@@ -34,9 +34,6 @@ export default defineConfig({
       '@emailjs/browser'
     ]
   },
-  // Define environment variables that should be available in production
-  define: {
-    // Ensure environment variables are properly handled
-    __VITE_HR_MASTER__: JSON.stringify(process.env.VITE_HR_MASTER || 'demo_password')
-  }
+  // Environment variables are handled automatically by Vite
+  // No need to define them in vite.config.js - use import.meta.env in components
 })
