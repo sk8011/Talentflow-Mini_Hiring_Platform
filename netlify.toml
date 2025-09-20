@@ -1,0 +1,35 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Environment variables for the application
+  VITE_HR_MASTER = "password"
+  VITE_SERVICE_ID = ""
+  VITE_TEMPLATE_ID = ""
+  VITE_PUBLIC_KEY = ""
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Secrets scanning configuration
+[build.processing.secrets]
+  # Ignore secrets in build output (dist folder)
+  omit_paths = [
+    "dist/",
+    "dist/assets/",
+    "dist/assets/*.js",
+    "dist/assets/*.css"
+  ]
+  # Allow specific environment variable names
+  omit_keys = [
+    "VITE_HR_MASTER",
+    "VITE_SERVICE_ID",
+    "VITE_TEMPLATE_ID",
+    "VITE_PUBLIC_KEY"
+  ]
