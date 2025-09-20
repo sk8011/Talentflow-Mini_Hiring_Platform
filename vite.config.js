@@ -37,6 +37,6 @@ export default defineConfig({
   // Define environment variables that should be available in production
   define: {
     // Ensure environment variables are properly handled
-    __VITE_HR_MASTER__: JSON.stringify(process.env.VITE_HR_MASTER || 'password')
+    __VITE_HR_MASTER__: JSON.stringify(process.env.VITE_HR_MASTER || 'demo_password')
   }
 })

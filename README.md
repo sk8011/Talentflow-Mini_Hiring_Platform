@@ -371,6 +371,9 @@ frontend/
 Create a `.env` file in the frontend directory:
 
 ```env
+# HR Portal Master Password (use any password for demo)
+VITE_HR_MASTER=demo_password
+
 # EmailJS Configuration (Optional - for sending candidate invitations)
 VITE_SERVICE_ID=your_emailjs_service_id
 VITE_TEMPLATE_ID=your_emailjs_template_id  
