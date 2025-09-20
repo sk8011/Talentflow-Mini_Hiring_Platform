@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 // Very simple master password login for HR
@@ -10,6 +10,17 @@ export default function HRLogin() {
   const navigate = useNavigate()
 
   const MASTER = import.meta.env.VITE_HR_MASTER || 'password'
+
+  // Show a one-time alert with the HR master password hint when arriving here
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const key = 'hr_login_hint_shown'
+      if (!sessionStorage.getItem(key)) {
+        alert('Login password is "password"')
+        sessionStorage.setItem(key, '1')
+      }
+    }
+  }, [])
 
   const submit = async (e) => {
     e && e.preventDefault()
