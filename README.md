@@ -21,6 +21,7 @@ npm run dev
 
 - [Architecture](#-architecture)
 - [Features](#-features)
+- [Workflow Diagrams](#-workflow-diagrams)
 - [Folder Structure](#-folder-structure)
 - [Environment Setup](#-environment-setup)
 - [API Endpoints](#-api-endpoints)
