@@ -14,7 +14,6 @@ import ConfirmDialog from './components/common/ConfirmDialog'
 import Toast from './components/common/Toast'
 import { Routes, Route, useParams, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import ArchivedList from './components/jobs/ArchivedList'
-import { EnvDebug } from './lib/debug'
 
 // Hoisted HRGate to module scope so its identity is stable across App re-renders
 const HRGate = ({ children }) => {
