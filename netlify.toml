@@ -3,11 +3,9 @@
   publish = "dist"
 
 [build.environment]
-  # Environment variables for the application
-  VITE_HR_MASTER = "demo_password"
-  VITE_SERVICE_ID = ""
-  VITE_TEMPLATE_ID = ""
-  VITE_PUBLIC_KEY = ""
+  # Environment variables for the applications
+  # EmailJS variables should be set in the Netlify dashboard (do not define here to avoid overriding dashboard values)
+  # VITE_SERVICE_ID, VITE_TEMPLATE_ID, VITE_PUBLIC_KEY
 
 [[headers]]
   for = "/*"
