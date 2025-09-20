@@ -87,7 +87,7 @@ User Interaction → React Components → API Calls → MirageJS Server → Loca
 
 **HR Portal Access:**
 - **Email**: Any email (e.g., `hr@company.com`)
-- **Password**: Set via environment variable (see Development Setup)
+- **Password**: "password"
 - **Access**: Full administrative access to all features
 
 **Candidate Portal Access:**
