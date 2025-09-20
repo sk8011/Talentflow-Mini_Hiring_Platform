@@ -675,7 +675,6 @@ export default function App() {
           <Route path="/candidate/assessments/:jobId/run" element={<AssessmentRunnerRoute />} />
         </Routes>
       <Toast toasts={toasts} onRemove={(id) => setToasts((t) => t.filter((x) => x.id !== id))} autoDismiss={true} expirationInterval={3000} />
-      <EnvDebug />
     </div>
   )
 }
