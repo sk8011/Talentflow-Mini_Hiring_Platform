@@ -7,14 +7,48 @@ function useVisibleQuestions(assessment, responses) {
     const map = new Map()
     for (const section of assessment?.sections || []) {
       for (const q of section.questions || []) {
-        const cond = q.condition
-        if (!cond || !cond.if || !cond.if.questionId) {
+        // Support both builder schema (showIf) and legacy schema (condition.if)
+        const showIf = q?.showIf && q.showIf.questionId
+          ? { questionId: q.showIf.questionId, equals: q.showIf.equals }
+          : (q?.condition?.if && q.condition.if.questionId
+              ? { questionId: q.condition.if.questionId, equals: q.condition.if.equals }
+              : null)
+
+        // No condition => visible
+        if (!showIf || !showIf.questionId) {
           map.set(q.id, true)
           continue
         }
-        const targetValue = responses[cond.if.questionId]
-        const expected = cond.if.equals
-        map.set(q.id, targetValue === expected)
+
+        const target = responses[showIf.questionId]
+        const eqRaw = showIf.equals
+
+        // If target is an array (multi-choice)
+        if (Array.isArray(target)) {
+          // If no equals specified, require at least one selection
+          if (eqRaw === undefined || eqRaw === null || eqRaw === '') {
+            map.set(q.id, target.length > 0)
+            continue
+          }
+          const list = String(eqRaw).split(',').map((s) => s.trim()).filter(Boolean)
+          map.set(q.id, list.some((v) => target.includes(v)))
+          continue
+        }
+
+        // Scalar targets
+        if (eqRaw === undefined || eqRaw === null || eqRaw === '') {
+          // No explicit equals: treat as truthy check
+          map.set(q.id, Boolean(target))
+          continue
+        }
+
+        const list = String(eqRaw).split(',').map((s) => s.trim()).filter(Boolean)
+        const t = String(target ?? '')
+        if (list.length > 1) {
+          map.set(q.id, list.includes(t))
+        } else {
+          map.set(q.id, t === String(eqRaw))
+        }
       }
     }
     return map
