@@ -14,6 +14,7 @@ import ConfirmDialog from './components/common/ConfirmDialog'
 import Toast from './components/common/Toast'
 import { Routes, Route, useParams, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import ArchivedList from './components/jobs/ArchivedList'
+import { EnvDebug } from './lib/debug'
 
 // Hoisted HRGate to module scope so its identity is stable across App re-renders
 const HRGate = ({ children }) => {
@@ -675,6 +676,7 @@ export default function App() {
           <Route path="/candidate/assessments/:jobId/run" element={<AssessmentRunnerRoute />} />
         </Routes>
       <Toast toasts={toasts} onRemove={(id) => setToasts((t) => t.filter((x) => x.id !== id))} autoDismiss={true} expirationInterval={3000} />
+      <EnvDebug />
     </div>
   )
 }
