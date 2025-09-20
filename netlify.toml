@@ -4,7 +4,7 @@
 
 [build.environment]
   # Environment variables for the application
-  VITE_HR_MASTER = "password"
+  VITE_HR_MASTER = "demo_password"
   VITE_SERVICE_ID = ""
   VITE_TEMPLATE_ID = ""
   VITE_PUBLIC_KEY = ""
@@ -18,18 +18,42 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
 
 # Secrets scanning configuration
-[build.processing.secrets]
-  # Ignore secrets in build output (dist folder)
-  omit_paths = [
-    "dist/",
-    "dist/assets/",
-    "dist/assets/*.js",
-    "dist/assets/*.css"
+[build.processing]
+  secrets = [
+    { omit_keys = [
+        "VITE_HR_MASTER",
+        "VITE_SERVICE_ID",
+        "VITE_TEMPLATE_ID",
+        "VITE_PUBLIC_KEY"
+      ]
+    },
+    { omit_paths = [
+        "dist",
+        "dist/*",
+        "dist/**/*",
+        "dist/assets",
+        "dist/assets/*",
+        "dist/assets/**/*",
+        ".env*",
+        "node_modules"
+      ]
+    }
   ]
-  # Allow specific environment variable names
+
+# Alternative secrets scanning configuration (if the above doesn't work)
+[build.processing.secrets]
+  enabled = true
   omit_keys = [
     "VITE_HR_MASTER",
     "VITE_SERVICE_ID",
     "VITE_TEMPLATE_ID",
     "VITE_PUBLIC_KEY"
+  ]
+  omit_paths = [
+    "dist/",
+    "dist/assets/",
+    "dist/assets/*.js",
+    "dist/assets/*.css",
+    ".env*",
+    "node_modules"
   ]
