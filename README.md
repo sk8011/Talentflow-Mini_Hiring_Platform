@@ -80,17 +80,238 @@ User Interaction → React Components → API Calls → MirageJS Server → Loca
 - **Assessment Assignment**: Link assessments to specific jobs and candidates
 - **Submission Tracking**: View and analyze candidate responses
 
-### 🔐 Authentication & Access Control
-- **HR Portal**: Full administrative access to all features  
-- **Candidate Portal**: Limited access for taking assessments and viewing status
-- **Session Management**: Browser-based authentication with localStorage
-- **Role-based Access**: Different interfaces for HR and candidates
+### 🔐 Authentication & Access
 
-### 📧 Communication Features
-- **Email Invitations**: Send login credentials to candidates via EmailJS
-- **@Mentions System**: Tag team members in candidate notes
-- **Toast Notifications**: Real-time feedback for user actions
-- **Outbox System**: Track sent communications
+### Default Credentials
+
+**HR Portal Access:**
+- **Email**: Any email (e.g., `hr@company.com`)
+- **Password**: `password`
+- **Access**: Full administrative access to all features
+
+**Candidate Portal Access:**
+- Candidates receive login credentials via email invitation
+- Temporary password is generated automatically
+- First login requires password change
+
+## 📊 Workflow Diagrams
+
+### Complete User Journey
+
+#### **HR Workflow - Job Creation to Hiring**
+
+```mermaid
+graph TD
+    A[HR Logs In] --> B[Create New Job]
+    B --> C[Design Assessment]
+    C --> D[Publish Job]
+    D --> E[Invite Candidates]
+    E --> F[Review Applications]
+    F --> G[Move to Phone Screen]
+    G --> H[Schedule Onsite Interview]
+    H --> I[Make Offer]
+    I --> J[Hire Candidate]
+
+    E --> K[EmailJS Integration]
+    K --> L[Generate Random Password]
+    L --> M[Send Invitation Email]
+    M --> N[Candidate Receives Email]
+
+    F --> O[Kanban Board Management]
+    O --> P[Drag & Drop Stage Changes]
+    P --> Q[Timeline Updates]
+    Q --> R[Notification System]
+
+    C --> S[Assessment Builder]
+    S --> T[Live Preview]
+    T --> U[Conditional Logic]
+    U --> V[Question Types]
+```
+
+#### **Candidate Experience Flow**
+
+```mermaid
+graph TD
+    A[Receive Email Invitation] --> B[Click Login Link]
+    B --> C[Enter Credentials]
+    C --> D[Change Temporary Password]
+    D --> E[Access Candidate Portal]
+
+    E --> F[View Assigned Assessments]
+    F --> G[Take Assessment]
+    G --> H[Submit Responses]
+    H --> I[View Application Status]
+
+    F --> J[Assessment Interface]
+    J --> K[Form Validation]
+    K --> L[Progress Tracking]
+    L --> M[Auto-save Feature]
+
+    I --> N[Timeline Updates]
+    N --> O[Real-time Status]
+    O --> P[Communication Tracking]
+```
+
+### Detailed Operation Flows
+
+#### **Email Invitation Process**
+
+```mermaid
+sequenceDiagram
+    participant HR as HR User
+    participant App as TalentFlow App
+    participant API as MirageJS API
+    participant Storage as LocalForage
+    participant EmailJS as EmailJS Service
+    participant Candidate as Candidate
+
+    HR->>App: Click "Invite Candidate"
+    App->>API: POST /api/auth/invite
+    API->>Storage: Generate random password
+    Storage->>Storage: Store candidate auth record
+    API->>EmailJS: Send invitation email
+    EmailJS->>Candidate: Email with login credentials
+    Candidate->>App: Click login link
+    App->>API: POST /api/auth/candidate/login
+    API->>Storage: Verify credentials
+    Storage->>App: Authentication successful
+    App->>Candidate: Redirect to candidate portal
+```
+
+#### **Assessment Assignment Workflow**
+
+```mermaid
+sequenceDiagram
+    participant HR as HR User
+    participant App as TalentFlow App
+    participant API as MirageJS API
+    participant Storage as LocalForage
+    participant Candidate as Candidate
+
+    HR->>App: Select candidate for assessment
+    App->>App: Open assessment builder
+    App->>API: GET /api/assessments/{jobId}
+    API->>Storage: Load existing assessment
+    Storage->>App: Display assessment form
+    HR->>App: Configure questions & sections
+    App->>API: PUT /api/assessments/{jobId}
+    API->>Storage: Save assessment data
+
+    HR->>App: Assign assessment to candidate
+    App->>API: POST /api/candidates/{id}/assign
+    API->>Storage: Create assignment record
+    Storage->>App: Assignment created
+    App->>Candidate: Assessment assigned (notification)
+
+    Candidate->>App: Login to candidate portal
+    App->>API: GET /api/candidates/{id}/assignments
+    API->>Storage: Load assignments
+    Storage->>App: Display available assessments
+    Candidate->>App: Start assessment
+    App->>API: GET /api/assessments/{jobId}
+    API->>Storage: Load assessment questions
+    Storage->>App: Display assessment form
+    Candidate->>App: Complete & submit
+    App->>API: POST /api/assessments/{jobId}/submit
+    API->>Storage: Store submission data
+    Storage->>App: Submission recorded
+```
+
+#### **Candidate Stage Management**
+
+```mermaid
+sequenceDiagram
+    participant HR as HR User
+    participant App as TalentFlow App
+    participant API as MirageJS API
+    participant Storage as LocalForage
+    participant Timeline as Timeline System
+
+    HR->>App: View candidate in list/kanban
+    App->>API: GET /api/candidates (with filters)
+    API->>Storage: Load candidate data
+    Storage->>App: Display candidates
+
+    HR->>App: Drag candidate to new stage
+    App->>API: PUT /api/candidates/{id}
+    API->>Storage: Update candidate stage
+    Storage->>Timeline: Add stage change event
+    Timeline->>Storage: Store timeline entry
+    Storage->>App: Stage updated successfully
+
+    App->>App: Optimistic UI update
+    App->>App: Show toast notification
+    App->>App: Update kanban columns
+```
+
+### User Personas & Use Cases
+
+#### **HR Team Member Workflow**
+
+1. **Day 1: Setup**
+   - Login with default credentials
+   - Create first job posting
+   - Design assessment form
+   - Set up candidate pipeline stages
+
+2. **Weekly Operations**
+   - Review incoming applications
+   - Move candidates through pipeline
+   - Schedule interviews
+   - Send follow-up communications
+   - Track hiring metrics
+
+3. **Assessment Management**
+   - Build role-specific assessments
+   - Assign to qualified candidates
+   - Review completed submissions
+   - Make hiring decisions
+
+#### **Candidate Experience**
+
+1. **Application Process**
+   - Receive email invitation
+   - Create account with temp password
+   - Complete assigned assessments
+   - Track application progress
+
+2. **Ongoing Communication**
+   - Receive status updates
+   - Get notified of next steps
+   - Access assessment results
+   - Communicate with HR team
+
+#### **Technical Administrator**
+
+1. **System Management**
+   - Monitor system performance
+   - Manage user permissions
+   - Configure integrations (EmailJS)
+   - Backup and maintain data
+
+2. **Feature Enhancement**
+   - Add new question types
+   - Customize assessment templates
+   - Integrate with external systems
+   - Optimize performance for scale
+
+### Integration Points
+
+#### **External Services**
+- **EmailJS**: Candidate invitation delivery
+- **Browser APIs**: IndexedDB for data persistence
+- **File System**: Assessment file uploads (simulated)
+
+#### **Data Flow Architecture**
+```
+External Email → EmailJS → Application → MirageJS API → LocalForage → IndexedDB
+```
+
+#### **State Management**
+- **Component State**: Local UI state management
+- **Application State**: React Context for global settings
+- **Persistent State**: IndexedDB for data durability
+- **Session State**: localStorage for authentication
 
 ### 🎨 User Experience
 - **Responsive Design**: Mobile-friendly layout with adaptive containers
