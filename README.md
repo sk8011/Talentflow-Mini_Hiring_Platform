@@ -367,19 +367,37 @@ frontend/
 
 ## 🔧 Environment Setup
 
-### Required Environment Variables
+### Environment Variable Access
 
-Create a `.env` file in the frontend directory:
+**Important**: Environment variables work differently in development vs production:
 
-```env
-# HR Portal Master Password (use any password for demo)
-VITE_HR_MASTER=demo_password
+#### **Development (Local)**
+- Variables are read from `.env` file
+- Use `import.meta.env.VITE_VARIABLE_NAME` in your code
+- Create `.env` file with your values
 
-# EmailJS Configuration (Optional - for sending candidate invitations)
-VITE_SERVICE_ID=your_emailjs_service_id
-VITE_TEMPLATE_ID=your_emailjs_template_id  
-VITE_PUBLIC_KEY=your_emailjs_public_key
+#### **Production (Netlify)**
+- Variables are set in Netlify dashboard → Site Settings → Environment Variables
+- Variables must be prefixed with `VITE_` to be accessible
+- Use `import.meta.env.VITE_VARIABLE_NAME` in your code
+
+### Troubleshooting Environment Variables
+
+**Check if variables are loaded:**
+```javascript
+// Add this to any component to debug
+console.log('Environment variables:', {
+  VITE_HR_MASTER: import.meta.env.VITE_HR_MASTER,
+  VITE_SERVICE_ID: import.meta.env.VITE_SERVICE_ID,
+  VITE_TEMPLATE_ID: import.meta.env.VITE_TEMPLATE_ID,
+  VITE_PUBLIC_KEY: import.meta.env.VITE_PUBLIC_KEY
+})
 ```
+
+**Common Issues:**
+- Variables not prefixed with `VITE_` won't be accessible
+- `.env` file overrides Netlify variables in development
+- Variables are only available at runtime, not build time
 
 ### EmailJS Setup (Optional)
 
