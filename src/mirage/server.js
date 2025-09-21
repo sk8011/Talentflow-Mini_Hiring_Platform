@@ -1,4 +1,4 @@
-import { createServer } from 'miragejs'
+import { createServer, Response } from 'miragejs'
 import storage from '../lib/storage'
 
 function randInt(max) { return Math.floor(Math.random() * max) }
@@ -215,8 +215,15 @@ export default function makeServer({ environment = 'development' } = {}) {
       this.post('/auth/login', async (schema, request) => {
         await latency()
         const { email, password } = JSON.parse(request.requestBody)
-        const auth = await storage.getCandidateAuthByEmail(email)
-        if (!auth || auth.password !== password) return new Response(401, {}, { error: 'Invalid credentials' })
+        const emailKey = String(email || '').trim().toLowerCase()
+        const pass = String(password || '').trim()
+        if (!emailKey || !pass) return new Response(400, {}, { error: 'Email and password are required' })
+        const auth = await storage.getCandidateAuthByEmail(emailKey)
+        if (!auth || auth.password !== pass) return new Response(401, {}, { error: 'Invalid credentials' })
+        // Ensure the candidate still exists
+        const all = await storage.getCandidates({})
+        const exists = (all.candidates || []).some((c) => String(c.id) === String(auth.candidateId))
+        if (!exists) return new Response(401, {}, { error: 'Invalid credentials' })
         return { session: { candidateId: auth.candidateId, email: auth.email } }
       })
 
