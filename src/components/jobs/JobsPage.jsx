@@ -112,6 +112,11 @@ export default function JobsPage({ onNavigate, search: searchProp = '', type: ty
     }
   }, [jobsProp, searchProp, page, pageSize, typeProp, viewFilter])
 
+  // Reset to first page whenever filter inputs change
+  useEffect(() => {
+    setPage(1)
+  }, [typeProp, searchProp])
+
   async function createOrUpdate(id, payload) {
     if (!id) {
       const res = await fetch('/api/jobs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
