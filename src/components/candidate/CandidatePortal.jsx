@@ -31,7 +31,12 @@ export default function CandidatePortal() {
             const cRes = await fetch('/api/candidates')
             const cData = await cRes.json()
             const me = (cData.candidates || []).find((x) => String(x.id) === String(s.candidateId))
-            setCandidate(me || null)
+            if (!me) {
+              try { localStorage.removeItem('candidate_session') } catch {}
+              navigate('/candidate/login')
+              return
+            }
+            setCandidate(me)
             // assignments
             const ares = await fetch(`/api/candidates/${s.candidateId}/assignments`)
             const adata = await ares.json()

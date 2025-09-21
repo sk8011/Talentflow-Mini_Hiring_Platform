@@ -176,13 +176,15 @@ const api = {
   async createCandidateAuth(candidateId, email, password) {
     const key = 'candidate_auth'
     const auth = (await store.getItem(key)) || {}
-    auth[email] = { candidateId, email, password }
+    const emailKey = String(email || '').trim().toLowerCase()
+    auth[emailKey] = { candidateId, email: emailKey, password }
     await store.setItem(key, auth)
-    return auth[email]
+    return auth[emailKey]
   },
   async getCandidateAuthByEmail(email) {
     const auth = (await store.getItem('candidate_auth')) || {}
-    return auth[email] || null
+    const emailKey = String(email || '').trim().toLowerCase()
+    return auth[emailKey] || null
   },
   async assignAssessment(candidateId, jobId) {
     const key = `assignments:${candidateId}`
