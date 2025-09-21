@@ -22,6 +22,7 @@ export default function makeServer({ environment = 'development' } = {}) {
           pageSize: request.queryParams.pageSize || 25,
           sort: request.queryParams.sort,
           tags: request.queryParams.tags ? request.queryParams.tags.split(',') : undefined,
+          type: request.queryParams.type,
         }
         const data = await storage.getJobs(q)
         return data
