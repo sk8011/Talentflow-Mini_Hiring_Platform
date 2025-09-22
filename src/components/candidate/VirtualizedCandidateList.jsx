@@ -97,6 +97,7 @@ export default function VirtualizedCandidateList({
           onChangeStage={(newStage) => changeStage(candidate, newStage)}
           onDelete={() => onDelete(candidate.id)}
           onOpenProfile={onOpenProfile}
+          onUpdateCandidate={async (updates) => onUpdate && onUpdate(candidate.id, updates)}
         />
       </div>
     )
@@ -180,16 +181,38 @@ function CandidateRow({
   onToggleSelect, 
   onChangeStage, 
   onDelete,
-  onOpenProfile
+  onOpenProfile,
+  onUpdateCandidate
 }) {
   const [isEditing, setIsEditing] = useState(false)
   const [name, setName] = useState(candidate.name || '')
   const [email, setEmail] = useState(candidate.email || '')
+  const [editError, setEditError] = useState('')
 
-  const handleSave = () => {
-    // This would need to be connected to the parent's update function
-    // For now, just close editing mode
-    setIsEditing(false)
+  const handleSave = async () => {
+    const nextName = String(name || '').trim()
+    const nextEmail = String(email || '').trim()
+    if (!nextName) { setEditError('Name is required'); return }
+    if (!nextEmail) { setEditError('Email is required'); return }
+    // basic email format check
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+    if (!emailRe.test(nextEmail)) { setEditError('Enter a valid email'); return }
+    setEditError('')
+    try {
+      if (typeof onUpdateCandidate === 'function') {
+        const updated = await onUpdateCandidate({ name: nextName, email: nextEmail })
+        if (updated) {
+          setIsEditing(false)
+        } else {
+          // parent reported failure (e.g., duplicate email)
+          setEditError('Failed to save changes')
+        }
+      } else {
+        setIsEditing(false)
+      }
+    } catch (e) {
+      setEditError('Failed to save changes')
+    }
   }
 
   const handleCancel = () => {
@@ -252,6 +275,9 @@ function CandidateRow({
             >
               Cancel
             </button>
+            {editError && (
+              <span style={{ color: 'var(--danger)', fontSize: 12 }}>{editError}</span>
+            )}
           </div>
         ) : (
           <div>
