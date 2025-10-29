@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react'
 import JobList from './JobList'
 import JobDetail from './JobDetail'
 import JobModal from './JobModal'
+import { Button } from '../ui/Button'
+import { Badge } from '../ui/Badge'
+import { Label } from '../ui/Label'
+import { Plus, ChevronLeft, ChevronRight } from 'lucide-react'
 
 export default function JobsPage({ onNavigate, search: searchProp = '', type: typeProp = 'All', jobs: jobsProp = null, showArchived = false, setShowArchived = null }) {
   const [jobs, setJobs] = useState(jobsProp || [])
@@ -183,37 +187,60 @@ export default function JobsPage({ onNavigate, search: searchProp = '', type: ty
   }
 
   return (
-    <div>
-      <div className="toolbar" style={{ justifyContent: 'space-between', marginBottom: 12 }}>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <label style={{ fontSize: 14 }}>
-            View:
-            <select className="select" value={viewFilter} onChange={(e) => { setViewFilter(e.target.value); setPage(1) }} style={{ marginLeft: 6 }}>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight mb-2">Jobs</h2>
+        <p className="text-muted-foreground">Manage your job postings and openings</p>
+      </div>
+      
+      <div className="flex items-center justify-between gap-4 p-4 bg-card border rounded-lg">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Label className="text-sm font-medium">View:</Label>
+            <select 
+              value={viewFilter} 
+              onChange={(e) => { setViewFilter(e.target.value); setPage(1) }} 
+              className="h-9 w-32 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
               <option>All</option>
               <option>Archived</option>
               <option>Filled</option>
             </select>
-          </label>
-          <label style={{ fontSize: 14 }}>
-            Per page:
-            <select className="select" value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1) }} style={{ marginLeft: 6 }}>
+          </div>
+          <div className="flex items-center gap-2">
+            <Label className="text-sm font-medium">Per page:</Label>
+            <select 
+              value={pageSize} 
+              onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1) }} 
+              className="h-9 w-24 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
               <option value={10}>10</option>
               <option value={25}>25</option>
               <option value={50}>50</option>
             </select>
-          </label>
-          <div className="badge badge-gray">{total} total</div>
+          </div>
+          <Badge variant="secondary">{total} total</Badge>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn btn-primary" onClick={() => { setModalOpen(true); setEditing(null) }}>+ Create job</button>
-        </div>
+        <Button onClick={() => { setModalOpen(true); setEditing(null) }}>
+          <Plus className="h-4 w-4 mr-2" />
+          Create Job
+        </Button>
       </div>
-      <div>
+      
+      <div className="space-y-4">
         <JobList jobs={visibleJobs} onDelete={handleDelete} onUpdate={handleUpdate} onArchive={async (id, archived) => { await handleUpdate(id, { archived }) }} onReorder={handleReorder} onNavigate={onNavigate} loading={loading} pendingIds={pendingIds} />
-        <div className="pager">
-          <button className="page btn" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Prev</button>
-          <span className="muted">Page {page} / {Math.ceil((total || 0) / pageSize) || 1}</span>
-          <button className="page btn" disabled={page >= Math.ceil((total || 0) / pageSize)} onClick={() => setPage((p) => p + 1)}>Next</button>
+        <div className="flex items-center justify-center gap-4 py-4">
+          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Previous
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Page {page} of {Math.ceil((total || 0) / pageSize) || 1}
+          </span>
+          <Button variant="outline" size="sm" disabled={page >= Math.ceil((total || 0) / pageSize)} onClick={() => setPage((p) => p + 1)}>
+            Next
+            <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
         </div>
       </div>
       <JobModal open={modalOpen} initial={editing} onClose={() => setModalOpen(false)} onSave={createOrUpdate} />

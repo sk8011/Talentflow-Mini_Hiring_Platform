@@ -1,4 +1,9 @@
 import React, { useState } from 'react'
+import { Button } from '../ui/Button'
+import { Input } from '../ui/Input'
+import { Badge } from '../ui/Badge'
+import { Card } from '../ui/Card'
+import { GripVertical, Edit2, Trash2, Archive, ArchiveRestore, CheckCircle2, XCircle } from 'lucide-react'
 
 export default function JobList({ jobs, onDelete, onUpdate, onArchive, onReorder, onNavigate, loading, pendingIds = new Set() }) {
   const [editingId, setEditingId] = useState(null)
@@ -7,8 +12,8 @@ export default function JobList({ jobs, onDelete, onUpdate, onArchive, onReorder
 
   const items = Array.isArray(jobs) ? jobs.filter(Boolean) : []
 
-  if (loading) return <div className="card">Loading jobs...</div>
-  if (!items || items.length === 0) return <div className="card muted">No jobs yet — add the first one!</div>
+  if (loading) return <Card className="p-6 text-center text-muted-foreground">Loading jobs...</Card>
+  if (!items || items.length === 0) return <Card className="p-6 text-center text-muted-foreground">No jobs yet — add the first one!</Card>
 
   const startEdit = (job) => {
     setEditingId(job.id)
@@ -57,87 +62,169 @@ export default function JobList({ jobs, onDelete, onUpdate, onArchive, onReorder
   }
 
   return (
-    <ul className="job-list">
+    <div className="space-y-3">
       {items.map((job) => (
-        <li key={job.id} draggable onDragStart={(e) => handleDragStart(e, job.id)} onDragOver={(e) => handleDragOver(e, job.id)} onDragLeave={handleDragLeave} onDrop={(e) => handleDrop(e, job.id)} className={`job-item card ${job.status === 'filled' ? 'filled' : ''} ${dragOverId === job.id ? 'drag-over' : ''} ${job.archived ? 'archived' : ''}`}>
-          <div className="job-main">
-            {editingId === job.id ? (
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <input className="input" value={form.title} onChange={(e) => setForm((s) => ({ ...s, title: e.target.value }))} placeholder="Job title" />
-                <input className="input" value={form.company} onChange={(e) => setForm((s) => ({ ...s, company: e.target.value }))} placeholder="Company" />
-                <input className="input" value={form.location} onChange={(e) => setForm((s) => ({ ...s, location: e.target.value }))} placeholder="Location" />
-                <select className="select" value={form.type} onChange={(e) => setForm((s) => ({ ...s, type: e.target.value }))}>
-                  <option>Full-time</option>
-                  <option>Part-time</option>
-                  <option>Contract</option>
-                </select>
+        <Card
+          key={job.id}
+          draggable
+          onDragStart={(e) => handleDragStart(e, job.id)}
+          onDragOver={(e) => handleDragOver(e, job.id)}
+          onDragLeave={handleDragLeave}
+          onDrop={(e) => handleDrop(e, job.id)}
+          className={`p-4 transition-all hover:shadow-md ${
+            job.status === 'filled' ? 'opacity-60 bg-muted' : ''
+          } ${
+            dragOverId === job.id ? 'ring-2 ring-primary bg-accent' : ''
+          } ${
+            job.archived ? 'opacity-50' : ''
+          }`}
+        >
+          <div className="flex items-start gap-4">
+            {/* Drag Handle */}
+            <div className="flex-shrink-0 pt-1">
+              <div
+                title="Drag to reorder"
+                className="cursor-grab p-2 rounded-md border border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors"
+              >
+                <GripVertical className="h-4 w-4 text-primary" />
               </div>
-            ) : (
-              <div>
-                <strong
-                  style={{ cursor: typeof onNavigate === 'function' ? 'pointer' : 'default' }}
-                  onClick={() => { if (typeof onNavigate === 'function') onNavigate(job.id) }}
-                >
-                  {job.title}
-                </strong>
-                <div className="meta" style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <span className="badge badge-gray">{job.company}</span>
-                  <span className="badge">{job.location || 'Remote'}</span>
-                  <span className="badge badge-green">{job.type || 'Full-time'}</span>
-                  {job.archived && <span className="badge badge-red">Archived</span>}
-                </div>
-              </div>
-            )}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div title="Drag to reorder" aria-hidden style={{ cursor: 'grab', padding: '6px 8px', border: '1px dashed #c7d2fe', borderRadius: 8, background: '#eef2ff', color: '#3730a3' }}>⋮⋮</div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <button className="btn btn-muted" aria-label="Move up" onClick={() => {
-                const idx = items.findIndex((j) => String(j.id) === String(job.id))
-                if (idx > 0) {
-                  const next = [...items]
-                  const [moved] = next.splice(idx, 1)
-                  next.splice(idx - 1, 0, moved)
-                  onReorder && onReorder(next.map((x) => String(x.id)))
-                }
-              }} disabled={pendingIds.has(String(job.id))}>▲</button>
-              <button className="btn btn-muted" aria-label="Move down" onClick={() => {
-                const idx = items.findIndex((j) => String(j.id) === String(job.id))
-                if (idx < items.length - 1) {
-                  const next = [...items]
-                  const [moved] = next.splice(idx, 1)
-                  next.splice(idx + 1, 0, moved)
-                  onReorder && onReorder(next.map((x) => String(x.id)))
-                }
-              }} disabled={pendingIds.has(String(job.id))}>▼</button>
             </div>
-            <div className="job-actions">
-              <div style={{ marginRight: 8 }}>
-                <button className="btn" onClick={() => typeof onArchive === 'function' && onArchive(job.id, !(job.archived === true))} disabled={pendingIds.has(String(job.id))}>{job.archived ? 'Unarchive' : 'Archive'}</button>
-              </div>
-              <div style={{ marginRight: 8 }}>
-                {job.status === 'filled' ? (
-                  <button className="btn" onClick={() => onUpdate(job.id, { status: 'open' })} disabled={pendingIds.has(String(job.id))}>Reopen</button>
-                ) : (
-                  <button className="btn" onClick={() => onUpdate(job.id, { status: 'filled' })} disabled={pendingIds.has(String(job.id))}>Mark filled</button>
-                )}
-              </div>
+
+            {/* Main Content */}
+            <div className="flex-1 min-w-0">
+              {editingId === job.id ? (
+                <div className="flex flex-wrap gap-2">
+                  <Input
+                    value={form.title}
+                    onChange={(e) => setForm((s) => ({ ...s, title: e.target.value }))}
+                    placeholder="Job title"
+                    className="flex-1 min-w-[200px]"
+                  />
+                  <Input
+                    value={form.company}
+                    onChange={(e) => setForm((s) => ({ ...s, company: e.target.value }))}
+                    placeholder="Company"
+                    className="flex-1 min-w-[150px]"
+                  />
+                  <Input
+                    value={form.location}
+                    onChange={(e) => setForm((s) => ({ ...s, location: e.target.value }))}
+                    placeholder="Location"
+                    className="flex-1 min-w-[120px]"
+                  />
+                  <select
+                    value={form.type}
+                    onChange={(e) => setForm((s) => ({ ...s, type: e.target.value }))}
+                    className="h-10 w-32 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <option>Full-time</option>
+                    <option>Part-time</option>
+                    <option>Contract</option>
+                  </select>
+                </div>
+              ) : (
+                <div>
+                  <h3
+                    className={`text-lg font-semibold mb-2 ${
+                      typeof onNavigate === 'function' ? 'cursor-pointer hover:text-primary transition-colors' : ''
+                    } ${
+                      job.status === 'filled' ? 'line-through' : ''
+                    }`}
+                    onClick={() => {
+                      if (typeof onNavigate === 'function') onNavigate(job.id)
+                    }}
+                  >
+                    {job.title}
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary">{job.company}</Badge>
+                    <Badge variant="outline">{job.location || 'Remote'}</Badge>
+                    <Badge variant="success">{job.type || 'Full-time'}</Badge>
+                    {job.archived && <Badge variant="destructive">Archived</Badge>}
+                    {job.status === 'filled' && <Badge variant="secondary">Filled</Badge>}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex-shrink-0 flex flex-wrap gap-2 items-start">
               {editingId === job.id ? (
                 <>
-                  <button className="btn btn-primary" onClick={() => saveEdit(job.id)} disabled={pendingIds.has(String(job.id))}>Save</button>
-                  <button className="btn" onClick={cancelEdit} disabled={pendingIds.has(String(job.id))}>Cancel</button>
-                  {pendingIds.has(String(job.id)) && <span style={{ marginLeft: 8, color: '#6b7280' }}>(saving...)</span>}
+                  <Button
+                    size="sm"
+                    onClick={() => saveEdit(job.id)}
+                    disabled={pendingIds.has(String(job.id))}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={cancelEdit}
+                    disabled={pendingIds.has(String(job.id))}
+                  >
+                    Cancel
+                  </Button>
+                  {pendingIds.has(String(job.id)) && (
+                    <span className="text-sm text-muted-foreground">(saving...)</span>
+                  )}
                 </>
               ) : (
                 <>
-                  <button className="btn" onClick={() => startEdit(job)} disabled={pendingIds.has(String(job.id))}>Edit</button>
-                  <button className="btn btn-danger" onClick={() => onDelete(job.id)} disabled={pendingIds.has(String(job.id))}>Delete</button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => typeof onArchive === 'function' && onArchive(job.id, !(job.archived === true))}
+                    disabled={pendingIds.has(String(job.id))}
+                    title={job.archived ? 'Unarchive' : 'Archive'}
+                  >
+                    {job.archived ? (
+                      <ArchiveRestore className="h-4 w-4" />
+                    ) : (
+                      <Archive className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      onUpdate(job.id, { status: job.status === 'filled' ? 'open' : 'filled' })
+                    }
+                    disabled={pendingIds.has(String(job.id))}
+                    title={job.status === 'filled' ? 'Reopen' : 'Mark as filled'}
+                  >
+                    {job.status === 'filled' ? (
+                      <XCircle className="h-4 w-4" />
+                    ) : (
+                      <CheckCircle2 className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => startEdit(job)}
+                    disabled={pendingIds.has(String(job.id))}
+                    title="Edit"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onDelete(job.id)}
+                    disabled={pendingIds.has(String(job.id))}
+                    title="Delete"
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </>
               )}
             </div>
           </div>
-        </li>
+        </Card>
       ))}
-    </ul>
+    </div>
   )
 }

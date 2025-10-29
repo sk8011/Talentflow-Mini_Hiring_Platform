@@ -241,20 +241,87 @@ export default function makeServer({ environment = 'development' } = {}) {
     },
   })
 
-  // seed data if empty (25 jobs, 1000 candidates, 3 assessments)
+  // seed data if empty (20 jobs, 100 candidates, 3 assessments)
   ;(async () => {
     const makeJobs = () => {
-      const arr = []
-      for (let i = 1; i <= 25; i++) arr.push({ id: `job-${i}`, title: `Job ${i}`, slug: `job-${i}`, status: 'open', tags: ['engineering', i % 2 ? 'frontend' : 'backend'], order: i, archived: false })
-      return arr
+      const companies = ['TechCorp', 'InnovateLabs', 'DataSystems', 'CloudNine', 'DevStudio', 'AgileWorks', 'CodeCraft', 'ByteForge']
+      const locations = ['San Francisco, CA', 'New York, NY', 'Austin, TX', 'Seattle, WA', 'Boston, MA', 'Remote', 'Denver, CO', 'Chicago, IL']
+      const types = ['Full-time', 'Part-time', 'Contract']
+      
+      const jobs = [
+        { title: 'Senior Frontend Engineer', company: 'TechCorp', location: 'San Francisco, CA', type: 'Full-time', tags: ['engineering', 'frontend', 'react'] },
+        { title: 'Backend Developer', company: 'InnovateLabs', location: 'Remote', type: 'Full-time', tags: ['engineering', 'backend', 'node'] },
+        { title: 'Full Stack Engineer', company: 'DataSystems', location: 'New York, NY', type: 'Full-time', tags: ['engineering', 'fullstack'] },
+        { title: 'DevOps Engineer', company: 'CloudNine', location: 'Seattle, WA', type: 'Full-time', tags: ['engineering', 'devops', 'aws'] },
+        { title: 'Product Manager', company: 'TechCorp', location: 'San Francisco, CA', type: 'Full-time', tags: ['product', 'management'] },
+        { title: 'UX/UI Designer', company: 'DevStudio', location: 'Austin, TX', type: 'Full-time', tags: ['design', 'ux'] },
+        { title: 'Data Scientist', company: 'DataSystems', location: 'Boston, MA', type: 'Full-time', tags: ['data', 'ml', 'python'] },
+        { title: 'Mobile Developer (iOS)', company: 'AgileWorks', location: 'Remote', type: 'Full-time', tags: ['engineering', 'mobile', 'ios'] },
+        { title: 'QA Engineer', company: 'CodeCraft', location: 'Denver, CO', type: 'Full-time', tags: ['engineering', 'qa', 'testing'] },
+        { title: 'Security Engineer', company: 'CloudNine', location: 'Seattle, WA', type: 'Full-time', tags: ['engineering', 'security'] },
+        { title: 'Frontend Developer (React)', company: 'ByteForge', location: 'Remote', type: 'Contract', tags: ['engineering', 'frontend', 'react'] },
+        { title: 'Machine Learning Engineer', company: 'InnovateLabs', location: 'San Francisco, CA', type: 'Full-time', tags: ['engineering', 'ml', 'ai'] },
+        { title: 'Technical Writer', company: 'TechCorp', location: 'Remote', type: 'Part-time', tags: ['documentation', 'writing'] },
+        { title: 'Solutions Architect', company: 'CloudNine', location: 'Chicago, IL', type: 'Full-time', tags: ['engineering', 'architecture'] },
+        { title: 'Customer Success Manager', company: 'AgileWorks', location: 'New York, NY', type: 'Full-time', tags: ['customer', 'support'] },
+        { title: 'Marketing Manager', company: 'DevStudio', location: 'Austin, TX', type: 'Full-time', tags: ['marketing', 'growth'] },
+        { title: 'Sales Engineer', company: 'DataSystems', location: 'Boston, MA', type: 'Full-time', tags: ['sales', 'engineering'] },
+        { title: 'Site Reliability Engineer', company: 'ByteForge', location: 'Remote', type: 'Full-time', tags: ['engineering', 'sre', 'devops'] },
+        { title: 'Engineering Manager', company: 'TechCorp', location: 'San Francisco, CA', type: 'Full-time', tags: ['engineering', 'management', 'leadership'] },
+        { title: 'Junior Backend Developer', company: 'CodeCraft', location: 'Denver, CO', type: 'Full-time', tags: ['engineering', 'backend', 'junior'] }
+      ]
+      
+      return jobs.map((job, i) => ({
+        id: `job-${i + 1}`,
+        title: job.title,
+        company: job.company,
+        location: job.location,
+        type: job.type,
+        slug: job.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        status: i >= 18 ? 'filled' : 'open',
+        tags: job.tags,
+        order: i + 1,
+        archived: i === 19
+      }))
     }
+    
     const stages = ['Applied','Phone Screen','Onsite','Offer','Hired','Rejected']
     const makeCandidates = (jobs) => {
+      const firstNames = ['Alex', 'Jordan', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Avery', 'Quinn', 'Sage', 'Rowan', 
+                          'Cameron', 'Dakota', 'Emerson', 'Finley', 'Harper', 'Hayden', 'Jamie', 'Jesse', 'Kai', 'Logan',
+                          'Marley', 'Parker', 'Peyton', 'Reese', 'River', 'Sawyer', 'Skyler', 'Spencer', 'Sydney', 'Tatum']
+      const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez',
+                        'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin',
+                        'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson']
+      
       const arr = []
-      for (let i = 1; i <= 900; i++) {
-        const job = jobs[(i - 1) % jobs.length]
-        const stage = stages[Math.floor(Math.random() * stages.length)]
-        arr.push({ id: `cand-${i}`, name: `Candidate ${i}`, email: `candidate${i}@example.com`, stage, jobId: job.id })
+      for (let i = 1; i <= 100; i++) {
+        const firstName = firstNames[i % firstNames.length]
+        const lastName = lastNames[Math.floor(i / 3) % lastNames.length]
+        const name = `${firstName} ${lastName}`
+        const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i}@example.com`
+        
+        // Distribute candidates across jobs and stages more realistically
+        const jobIndex = Math.floor((i - 1) / 5) % jobs.length
+        const job = jobs[jobIndex]
+        
+        // More candidates in early stages
+        let stage
+        const rand = Math.random()
+        if (rand < 0.35) stage = 'Applied'
+        else if (rand < 0.55) stage = 'Phone Screen'
+        else if (rand < 0.70) stage = 'Onsite'
+        else if (rand < 0.80) stage = 'Offer'
+        else if (rand < 0.90) stage = 'Hired'
+        else stage = 'Rejected'
+        
+        arr.push({ 
+          id: `cand-${i}`, 
+          name, 
+          email, 
+          stage, 
+          jobId: job.id 
+        })
       }
       return arr
     }

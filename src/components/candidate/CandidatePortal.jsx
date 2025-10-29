@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Button } from '../ui/Button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card'
+import { Badge } from '../ui/Badge'
+import { LogOut, FileText, CheckCircle2, Clock, User, Mail, Briefcase } from 'lucide-react'
 
 export default function CandidatePortal() {
   const [loading, setLoading] = useState(true)
@@ -81,83 +85,168 @@ export default function CandidatePortal() {
   function goRun(id) { navigate(`/candidate/assessments/${id}/run`) }
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2>Candidate Portal</h2>
-        <button className="btn" onClick={() => { localStorage.removeItem('candidate_session'); navigate('/candidate/login') }}>Logout</button>
-      </div>
-      {candidate && (
-        <div className="card" style={{ marginBottom: 12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <div style={{ fontWeight: 600 }}>{candidate.name}</div>
-              <div className="muted" style={{ fontSize: 12 }}>{candidate.email}</div>
+    <div className="min-h-screen bg-gradient-to-br from-secondary/5 via-background to-primary/5">
+      {/* Header */}
+      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
+              <User className="h-5 w-5 text-secondary-foreground" />
             </div>
-            <div className="badge">Stage: {candidate.stage || 'Applied'}</div>
+            <div>
+              <h1 className="text-xl font-bold">Candidate Portal</h1>
+              <p className="text-xs text-muted-foreground">Manage your applications</p>
+            </div>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => { localStorage.removeItem('candidate_session'); navigate('/candidate/login') }}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </Button>
         </div>
-      )}
-
-      <div className="card" style={{ marginTop: 12 }}>
-        <h3 style={{ marginTop: 0 }}>My Assignments</h3>
-        {assignments.length === 0 ? (
-          <div className="muted">No assignments yet.</div>
-        ) : (
-          <div style={{ display: 'grid', gap: 8 }}>
-            {assignments.map((id) => {
-              const subs = submissionsByJob[id] || []
-              const hasSubmitted = subs.length > 0
-              const last = hasSubmitted ? subs.sort((a,b)=> (b.at||0)-(a.at||0))[0] : null
-              return (
-                <div key={id} className="card" style={{ padding: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div>
-                    <div style={{ fontWeight: 600 }}>{jobMap[id]?.title || `Job ${id}`}</div>
-                    <div className="muted" style={{ fontSize: 12 }}>Job ID: {id}</div>
-                    {hasSubmitted && (
-                      <div className="badge" style={{ marginTop: 6 }}>Submitted {new Date(last.at).toLocaleString()}</div>
-                    )}
-                  </div>
-                  {!hasSubmitted ? (
-                    <button className="btn btn-primary" onClick={() => goRun(id)}>Take Assessment</button>
-                  ) : (
-                    <span className="muted" style={{ fontSize: 12 }}>Completed</span>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        )}
       </div>
 
-      {/* Submission History */}
-      <div className="card" style={{ marginTop: 12 }}>
-        <h3 style={{ marginTop: 0 }}>Submission History</h3>
-        {Object.keys(submissionsByJob).length === 0 ? (
-          <div className="muted">No submissions yet.</div>
-        ) : (
-          <div style={{ display: 'grid', gap: 8 }}>
-            {Object.entries(submissionsByJob).map(([jobId, list]) => (
-              (list && list.length > 0) ? (
-                <div key={jobId} className="card" style={{ padding: 12 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <div style={{ fontWeight: 600 }}>{jobMap[jobId]?.title || `Job ${jobId}`}</div>
-                    <div className="muted">{list.length} submission{list.length>1 ? 's' : ''}</div>
+      <div className="container mx-auto px-4 py-8 max-w-5xl">
+        {/* Profile Card */}
+        {candidate && (
+          <Card className="mb-6 animate-fade-in">
+            <CardContent className="pt-6">
+              <div className="flex items-start justify-between flex-wrap gap-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="h-8 w-8 text-primary" />
                   </div>
-                  <div style={{ marginTop: 8 }}>
-                    {list.sort((a,b)=> (b.at||0)-(a.at||0)).map((s) => (
-                      <div key={s.id} className="card" style={{ padding: 8, marginBottom: 6 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <div>Submission {s.id}</div>
-                          <div className="muted">{new Date(s.at).toLocaleString()}</div>
+                  <div>
+                    <h2 className="text-2xl font-bold mb-1">{candidate.name}</h2>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                      <Mail className="h-4 w-4" />
+                      {candidate.email}
+                    </div>
+                    <Badge variant="secondary" className="text-xs">
+                      Current Stage: {candidate.stage || 'Applied'}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Assignments Section */}
+        <Card className="mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              <CardTitle>My Assignments</CardTitle>
+            </div>
+            <CardDescription>Complete your assessments to move forward</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {assignments.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>No assignments yet.</p>
+                <p className="text-sm mt-1">Check back later for new assessments.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {assignments.map((id) => {
+                  const subs = submissionsByJob[id] || []
+                  const hasSubmitted = subs.length > 0
+                  const last = hasSubmitted ? subs.sort((a,b)=> (b.at||0)-(a.at||0))[0] : null
+                  return (
+                    <Card key={id} className="p-4 hover:shadow-md transition-shadow">
+                      <div className="flex items-center justify-between gap-4 flex-wrap">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Briefcase className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <h3 className="font-semibold text-lg">{jobMap[id]?.title || `Job ${id}`}</h3>
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-2">Job ID: {id}</p>
+                          {hasSubmitted && (
+                            <div className="flex items-center gap-2">
+                              <CheckCircle2 className="h-4 w-4 text-green-600" />
+                              <span className="text-xs text-muted-foreground">
+                                Submitted {new Date(last.at).toLocaleString()}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-shrink-0">
+                          {!hasSubmitted ? (
+                            <Button onClick={() => goRun(id)}>
+                              <FileText className="h-4 w-4 mr-2" />
+                              Take Assessment
+                            </Button>
+                          ) : (
+                            <Badge variant="success" className="flex items-center gap-1">
+                              <CheckCircle2 className="h-3 w-3" />
+                              Completed
+                            </Badge>
+                          )}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null
-            ))}
-          </div>
-        )}
+                    </Card>
+                  )
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Submission History */}
+        <Card className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-primary" />
+              <CardTitle>Submission History</CardTitle>
+            </div>
+            <CardDescription>View all your past submissions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {Object.keys(submissionsByJob).length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Clock className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>No submissions yet.</p>
+                <p className="text-sm mt-1">Complete an assessment to see your history.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {Object.entries(submissionsByJob).map(([jobId, list]) => (
+                  (list && list.length > 0) ? (
+                    <Card key={jobId} className="p-4">
+                      <div className="flex justify-between items-center mb-3">
+                        <div className="flex items-center gap-2">
+                          <Briefcase className="h-4 w-4 text-muted-foreground" />
+                          <h4 className="font-semibold">{jobMap[jobId]?.title || `Job ${jobId}`}</h4>
+                        </div>
+                        <Badge variant="secondary">
+                          {list.length} submission{list.length>1 ? 's' : ''}
+                        </Badge>
+                      </div>
+                      <div className="space-y-2">
+                        {list.sort((a,b)=> (b.at||0)-(a.at||0)).map((s) => (
+                          <div key={s.id} className="flex justify-between items-center p-3 bg-muted rounded-md">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle2 className="h-4 w-4 text-green-600" />
+                              <span className="text-sm font-medium">Submission {s.id}</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(s.at).toLocaleString()}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+                  ) : null
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

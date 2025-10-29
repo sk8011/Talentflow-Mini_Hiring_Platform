@@ -1,4 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { Button } from '../ui/Button'
+import { Input } from '../ui/Input'
+import { Textarea } from '../ui/Textarea'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/Card'
+import { Label } from '../ui/Label'
+import { Alert, AlertDescription } from '../ui/Alert'
+import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
 
 // Simple evaluator for conditional visibility
 // condition example: { if: { questionId: 'q1', equals: 'Yes' } }
@@ -152,103 +159,188 @@ export default function AssessmentRunner({ jobId, onDone, candidateId: candidate
     }
   }
 
-  if (loading) return <div>Loading assessment…</div>
+  if (loading) {
+    return (
+      <Card className="max-w-2xl mx-auto border-border/50 bg-card/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            Loading assessment…
+          </CardTitle>
+          <CardDescription>Please wait while we fetch the questions.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-24 animate-pulse rounded-md bg-muted" />
+        </CardContent>
+      </Card>
+    )
+  }
+
   if (!assessment || !assessment.sections || assessment.sections.length === 0) {
     return (
-      <div className="card">
-        <div style={{ fontWeight: 600, marginBottom: 4 }}>No assessment configured</div>
-        <div className="muted">Use the Builder to add sections and questions.</div>
-      </div>
+      <Card className="max-w-2xl mx-auto border-border/50 bg-card/50">
+        <CardHeader>
+          <CardTitle>No assessment configured</CardTitle>
+          <CardDescription>Use the Builder to add sections and questions.</CardDescription>
+        </CardHeader>
+      </Card>
     )
   }
 
   if (submitResult) {
     return (
-      <div className="card" style={{ maxWidth: 720 }}>
-        <h3 style={{ marginTop: 0 }}>Submission received</h3>
-        <div className="muted" style={{ marginBottom: 12 }}>Your answers have been recorded locally.</div>
-        <button className="btn btn-primary" onClick={onDone}>Back</button>
-      </div>
+      <Card className="max-w-2xl mx-auto border-border/50 bg-card/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CheckCircle2 className="h-6 w-6 text-green-500" />
+            Submission received
+          </CardTitle>
+          <CardDescription>Your answers have been recorded successfully.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={onDone}>Back to Dashboard</Button>
+        </CardContent>
+      </Card>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }}>
-      <div className="card" style={{ maxWidth: 900 }}>
-        <h3 style={{ marginTop: 0 }}>{assessment.title || 'Assessment'}</h3>
-        {assessment.description && <p className="muted">{assessment.description}</p>}
+    <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-6">
+      <Card className="border-border/50 bg-card/50">
+        <CardHeader>
+          <CardTitle>{assessment.title || 'Assessment'}</CardTitle>
+          {assessment.description && <CardDescription>{assessment.description}</CardDescription>}
+        </CardHeader>
+        <CardContent className="space-y-6">
 
-        {(assessment.sections || []).map((section) => (
-          <div key={section.id} style={{ marginTop: 16 }}>
-            <h4 style={{ margin: '8px 0' }}>{section.title}</h4>
-            {section.description && <div className="muted" style={{ marginBottom: 8 }}>{section.description}</div>}
-            <div style={{ display: 'grid', gap: 12 }}>
-              {(section.questions || []).map((q) => (
-                visibleMap.get(q.id) ? (
-                  <div key={q.id} className="card" style={{ padding: 12 }}>
-                    <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
-                      {q.label} {q.required && <span style={{ color: '#ef4444' }}>*</span>}
-                    </label>
+          {(assessment.sections || []).map((section) => (
+            <div key={section.id} className="space-y-4">
+              <div>
+                <h4 className="font-semibold text-base mb-1">{section.title}</h4>
+                {section.description && <p className="text-sm text-muted-foreground">{section.description}</p>}
+              </div>
+              <div className="space-y-4">
+                {(section.questions || []).map((q) => (
+                  visibleMap.get(q.id) ? (
+                    <Card key={q.id} className="border-border/50 bg-background">
+                      <CardContent className="pt-6 space-y-3">
+                        <Label className="text-base font-medium">
+                          {q.label} {q.required && <span className="text-destructive ml-1">*</span>}
+                        </Label>
 
-                    {q.type === 'short-text' && (
-                      <input className="input" type="text" value={responses[q.id] || ''} onChange={(e) => setAnswer(q.id, e.target.value)} maxLength={q.validation?.maxLength} />
-                    )}
+                        {q.type === 'short-text' && (
+                          <Input
+                            type="text"
+                            value={responses[q.id] || ''}
+                            onChange={(e) => setAnswer(q.id, e.target.value)}
+                            maxLength={q.validation?.maxLength}
+                            placeholder="Your answer"
+                          />
+                        )}
 
-                    {q.type === 'long-text' && (
-                      <textarea className="input" value={responses[q.id] || ''} onChange={(e) => setAnswer(q.id, e.target.value)} maxLength={q.validation?.maxLength} style={{ minHeight: 100 }} />
-                    )}
+                        {q.type === 'long-text' && (
+                          <Textarea
+                            value={responses[q.id] || ''}
+                            onChange={(e) => setAnswer(q.id, e.target.value)}
+                            maxLength={q.validation?.maxLength}
+                            placeholder="Your answer"
+                            className="min-h-[100px]"
+                          />
+                        )}
 
-                    {q.type === 'numeric' && (
-                      <input className="input" type="number" value={responses[q.id] || ''} onChange={(e) => setAnswer(q.id, e.target.value)} min={q.validation?.min} max={q.validation?.max} />
-                    )}
+                        {q.type === 'numeric' && (
+                          <Input
+                            type="number"
+                            value={responses[q.id] || ''}
+                            onChange={(e) => setAnswer(q.id, e.target.value)}
+                            min={q.validation?.min}
+                            max={q.validation?.max}
+                            placeholder="Enter a number"
+                            className="w-48"
+                          />
+                        )}
 
-                    {q.type === 'single-choice' && (
-                      <div>
-                        {(q.options || []).map((opt) => (
-                          <label key={opt.id} style={{ display: 'block', marginBottom: 6 }}>
-                            <input type="radio" name={q.id} value={opt.value} checked={responses[q.id] === opt.value} onChange={(e) => setAnswer(q.id, e.target.value)} style={{ marginRight: 8 }} />
-                            {opt.label}
-                          </label>
-                        ))}
-                      </div>
-                    )}
+                        {q.type === 'single-choice' && (
+                          <div className="space-y-2">
+                            {(q.options || []).map((opt) => (
+                              <label key={opt.id} className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name={q.id}
+                                  value={opt.value}
+                                  checked={responses[q.id] === opt.value}
+                                  onChange={(e) => setAnswer(q.id, e.target.value)}
+                                  className="h-4 w-4"
+                                />
+                                <span className="text-sm">{opt.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        )}
 
-                    {q.type === 'multi-choice' && (
-                      <div>
-                        {(q.options || []).map((opt) => {
-                          const arr = Array.isArray(responses[q.id]) ? responses[q.id] : []
-                          const checked = arr.includes(opt.value)
-                          return (
-                            <label key={opt.id} style={{ display: 'block', marginBottom: 6 }}>
-                              <input type="checkbox" value={opt.value} checked={checked} onChange={(e) => {
-                                const curr = Array.isArray(responses[q.id]) ? responses[q.id] : []
-                                const next = e.target.checked ? [...curr, opt.value] : curr.filter((v) => v !== opt.value)
-                                setAnswer(q.id, next)
-                              }} style={{ marginRight: 8 }} />
-                              {opt.label}
-                            </label>
-                          )
-                        })}
-                      </div>
-                    )}
+                        {q.type === 'multi-choice' && (
+                          <div className="space-y-2">
+                            {(q.options || []).map((opt) => {
+                              const arr = Array.isArray(responses[q.id]) ? responses[q.id] : []
+                              const checked = arr.includes(opt.value)
+                              return (
+                                <label key={opt.id} className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    value={opt.value}
+                                    checked={checked}
+                                    onChange={(e) => {
+                                      const curr = Array.isArray(responses[q.id]) ? responses[q.id] : []
+                                      const next = e.target.checked ? [...curr, opt.value] : curr.filter((v) => v !== opt.value)
+                                      setAnswer(q.id, next)
+                                    }}
+                                    className="h-4 w-4 rounded"
+                                  />
+                                  <span className="text-sm">{opt.label}</span>
+                                </label>
+                              )
+                            })}
+                          </div>
+                        )}
 
-                    {q.type === 'file-upload' && (
-                      <input className="input" type="file" onChange={(e) => setAnswer(q.id, e.target.files?.[0]?.name || '')} />
-                    )}
+                        {q.type === 'file-upload' && (
+                          <Input
+                            type="file"
+                            onChange={(e) => setAnswer(q.id, e.target.files?.[0]?.name || '')}
+                          />
+                        )}
 
-                    {errors[q.id] && (<div className="badge badge-red" style={{ marginTop: 8 }}>{errors[q.id]}</div>)}
-                  </div>
-                ) : null
-              ))}
+                        {errors[q.id] && (
+                          <Alert variant="destructive">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription>{errors[q.id]}</AlertDescription>
+                          </Alert>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ) : null
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
 
-        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-          <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Submitting…' : 'Submit'}</button>
-          <button type="button" className="btn" onClick={onDone} disabled={saving}>Cancel</button>
-        </div>
-      </div>
+          <div className="flex gap-3 border-t border-border/50 pt-6">
+            <Button type="submit" disabled={saving}>
+              {saving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting…
+                </>
+              ) : (
+                'Submit Assessment'
+              )}
+            </Button>
+            <Button type="button" variant="outline" onClick={onDone} disabled={saving}>
+              Cancel
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </form>
   )
 }

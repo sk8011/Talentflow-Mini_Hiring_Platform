@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from 'react'
+import { Button } from '../ui/Button'
+import { Input } from '../ui/Input'
+import { Textarea } from '../ui/Textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/Select'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/Card'
+import { Badge } from '../ui/Badge'
+import { Label } from '../ui/Label'
+import { Switch } from '../ui/Switch'
+import { ScrollArea } from '../ui/ScrollArea'
+import { Plus, Trash2, ChevronDown, ChevronUp, Save, Loader2, Eye, EyeOff, X } from 'lucide-react'
 
 const QUESTION_TYPES = [
-  { value: 'single-choice', label: 'Single Choice' },
-  { value: 'multi-choice', label: 'Multiple Choice' },
-  { value: 'short-text', label: 'Short Text' },
-  { value: 'long-text', label: 'Long Text' },
-  { value: 'numeric', label: 'Numeric' },
-  { value: 'file-upload', label: 'File Upload' }
+  { value: 'single-choice', label: 'Single Choice', icon: '🔘' },
+  { value: 'multi-choice', label: 'Multiple Choice', icon: '☑️' },
+  { value: 'short-text', label: 'Short Text', icon: '✏️' },
+  { value: 'long-text', label: 'Long Text', icon: '📝' },
+  { value: 'numeric', label: 'Numeric', icon: '🔢' },
+  { value: 'file-upload', label: 'File Upload', icon: '📎' }
 ]
 
 export default function AssessmentBuilder({ jobId, onSave, onCancel }) {
@@ -201,82 +211,100 @@ export default function AssessmentBuilder({ jobId, onSave, onCancel }) {
   }
 
   if (loading) {
-    return <div>Loading assessment...</div>
+    return (
+      <Card className="border-border/50 bg-card/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            Loading assessment…
+          </CardTitle>
+          <CardDescription>Please wait while we fetch the configuration.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-24 animate-pulse rounded-md bg-muted" />
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
-    <div style={{ display: 'flex', gap: 20, height: '80vh' }}>
+    <div className="grid h-[80vh] gap-4 md:grid-cols-2">
       {/* Builder Panel */}
-      <div style={{ flex: 1, overflow: 'auto', padding: 20, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--card-bg)' }}>
-        <h2>Assessment Builder</h2>
-        
-        <div style={{ marginBottom: 20 }}>
-          <label style={{ display: 'block', marginBottom: 8, fontWeight: 600 }}>
-            Assessment Title
-          </label>
-          <input
-            type="text"
-            value={assessment.title}
-            onChange={(e) => setAssessment(prev => ({ ...prev, title: e.target.value }))}
-            style={{ width: '100%', padding: 8, border: '1px solid var(--border)', borderRadius: 4, background: 'var(--card-bg)', color: 'var(--text)' }}
-            placeholder="Enter assessment title"
-          />
-        </div>
+      <Card className="flex min-h-0 flex-col overflow-hidden border-border/50 bg-card/50">
+        <CardHeader className="shrink-0">
+          <CardTitle>Assessment Builder</CardTitle>
+          <CardDescription>Define sections, questions, and validation rules</CardDescription>
+        </CardHeader>
+        <ScrollArea className="flex-1">
+          <CardContent className="space-y-6">
+            {/* Assessment Title */}
+            <div className="space-y-2">
+              <Label htmlFor="assessment-title">Assessment Title</Label>
+              <Input
+                id="assessment-title"
+                value={assessment.title}
+                onChange={(e) => setAssessment(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Enter assessment title"
+              />
+            </div>
 
-        <div style={{ marginBottom: 20 }}>
-          <label style={{ display: 'block', marginBottom: 8, fontWeight: 600 }}>
-            Description
-          </label>
-          <textarea
-            value={assessment.description}
-            onChange={(e) => setAssessment(prev => ({ ...prev, description: e.target.value }))}
-            style={{ width: '100%', padding: 8, border: '1px solid var(--border)', borderRadius: 4, minHeight: 80, background: 'var(--card-bg)', color: 'var(--text)' }}
-            placeholder="Enter assessment description"
-          />
-        </div>
+            {/* Assessment Description */}
+            <div className="space-y-2">
+              <Label htmlFor="assessment-description">Description</Label>
+              <Textarea
+                id="assessment-description"
+                value={assessment.description}
+                onChange={(e) => setAssessment(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Enter assessment description"
+                className="min-h-[80px]"
+              />
+            </div>
 
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <h3>Sections</h3>
-            <button onClick={addSection} style={{ padding: '6px 12px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 4 }}>
-              Add Section
-            </button>
-          </div>
+            {/* Sections */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Sections</h3>
+                <Button onClick={addSection} size="sm">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Section
+                </Button>
+              </div>
 
           {(assessment.sections || []).map((section, sectionIndex) => (
-            <div key={section.id} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 16, marginBottom: 16, background: 'var(--card-bg)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <input
-                  type="text"
-                  value={section.title}
-                  onChange={(e) => updateSection(section.id, { title: e.target.value })}
-                  style={{ fontWeight: 600, fontSize: 16, border: 'none', background: 'transparent', color: 'var(--text)', flex: 1 }}
-                  placeholder="Section title"
-                />
-                <button
-                  onClick={() => deleteSection(section.id)}
-                  style={{ padding: '4px 8px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: 4 }}
-                >
-                  Delete
-                </button>
-              </div>
+              <Card key={section.id} className="border-border/50 bg-muted/30">
+                <CardHeader>
+                  <div className="flex items-center justify-between gap-3">
+                    <Input
+                      value={section.title}
+                      onChange={(e) => updateSection(section.id, { title: e.target.value })}
+                      placeholder="Section title"
+                      className="font-semibold text-base"
+                    />
+                    <Button
+                      onClick={() => deleteSection(section.id)}
+                      variant="destructive"
+                      size="sm"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Textarea
+                    value={section.description}
+                    onChange={(e) => updateSection(section.id, { description: e.target.value })}
+                    placeholder="Section description (optional)"
+                    rows={2}
+                  />
 
-              <textarea
-                value={section.description}
-                onChange={(e) => updateSection(section.id, { description: e.target.value })}
-                style={{ width: '100%', padding: 8, border: '1px solid var(--border)', borderRadius: 4, marginBottom: 12, background: 'var(--card-bg)', color: 'var(--text)' }}
-                placeholder="Section description"
-                rows={2}
-              />
-
-              <div style={{ marginBottom: 12 }}>
-                <button
-                  onClick={() => addQuestion(section.id)}
-                  style={{ padding: '6px 12px', background: '#10b981', color: '#fff', border: 'none', borderRadius: 4 }}
-                >
-                  Add Question
-                </button>
-              </div>
+                  <Button
+                    onClick={() => addQuestion(section.id)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Question
+                  </Button>
 
               {(section.questions || []).map((question, questionIndex) => (
                 <QuestionEditor
@@ -291,178 +319,260 @@ export default function AssessmentBuilder({ jobId, onSave, onCancel }) {
                   allQuestions={(assessment.sections || []).flatMap((sec) => sec.questions || [])}
                 />
               ))}
+                </CardContent>
+              </Card>
+            ))}
             </div>
-          ))}
-        </div>
 
-        <div style={{ display: 'flex', gap: 12, paddingTop: 20, borderTop: '1px solid #e5e7eb' }}>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            style={{ padding: '10px 20px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: 4 }}
-          >
-            {saving ? 'Saving...' : 'Save Assessment'}
-          </button>
-          <button
-            onClick={onCancel}
-            style={{ padding: '10px 20px', background: '#6b7280', color: 'white', border: 'none', borderRadius: 4 }}
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
+            {/* Action Buttons */}
+            <div className="flex gap-3 border-t border-border/50 pt-6">
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving…
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Assessment
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={onCancel}
+                variant="outline"
+              >
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </ScrollArea>
+      </Card>
 
       {/* Live Preview Panel */}
-      <div style={{ flex: 1, overflow: 'auto', padding: 20, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--card-bg)' }}>
-        <h2>Live Preview</h2>
-        <AssessmentPreview assessment={assessment} />
-      </div>
+      <Card className="flex min-h-0 flex-col overflow-hidden border-border/50 bg-card/50">
+        <CardHeader className="shrink-0">
+          <CardTitle>Live Preview</CardTitle>
+          <CardDescription>See what candidates will experience</CardDescription>
+        </CardHeader>
+        <ScrollArea className="flex-1">
+          <CardContent>
+            <AssessmentPreview assessment={assessment} />
+          </CardContent>
+        </ScrollArea>
+      </Card>
     </div>
   )
 }
 
 function QuestionEditor({ question, sectionId, onUpdate, onDelete, onAddOption, onUpdateOption, onDeleteOption, allQuestions = [] }) {
+  const [isExpanded, setIsExpanded] = useState(true)
   const needsOptions = ['single-choice', 'multi-choice'].includes(question.type)
+  const typeInfo = QUESTION_TYPES.find(t => t.value === question.type)
 
   return (
-    <div style={{ border: '1px solid #d1d5db', borderRadius: 6, padding: 12, marginBottom: 12, background: '#f9fafb' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <select
-          value={question.type}
-          onChange={(e) => onUpdate(sectionId, question.id, { type: e.target.value, options: needsOptions ? question.options : [] })}
-          style={{ padding: 4, border: '1px solid #e5e7eb', borderRadius: 4 }}
-        >
-          {QUESTION_TYPES.map(type => (
-            <option key={type.value} value={type.value}>{type.label}</option>
-          ))}
-        </select>
-        <button
-          onClick={() => onDelete(sectionId, question.id)}
-          style={{ padding: '4px 8px', background: '#ef4444', color: 'white', border: 'none', borderRadius: 4 }}
-        >
-          Delete
-        </button>
-      </div>
-
-      <input
-        type="text"
-        value={question.label}
-        onChange={(e) => onUpdate(sectionId, question.id, { label: e.target.value })}
-        style={{ width: '100%', padding: 8, border: '1px solid #e5e7eb', borderRadius: 4, marginBottom: 8 }}
-        placeholder="Question text"
-      />
-
-      <div style={{ marginBottom: 8 }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <input
-            type="checkbox"
-            checked={question.required}
-            onChange={(e) => onUpdate(sectionId, question.id, { required: e.target.checked })}
-          />
-          Required
-        </label>
-      </div>
-
-      {/* Conditional visibility (simple) */}
-      <div style={{ marginBottom: 8, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 6, padding: 8 }}>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 6 }}>Condition (optional): Show this question only if another question matches a value.</div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <select
-            value={question.showIf?.questionId || ''}
-            onChange={(e) => onUpdate(sectionId, question.id, { showIf: { ...(question.showIf || {}), questionId: e.target.value || undefined } })}
-            style={{ flex: 1, minWidth: 220, padding: 6, border: '1px solid #e5e7eb', borderRadius: 4, background: 'white' }}
+    <Card className="border-border/50 bg-background">
+      <div 
+        className="flex cursor-pointer items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsExpanded(!isExpanded)
+            }}
+            className="inline-flex items-center justify-center rounded p-1 hover:bg-muted"
           >
-            <option value="">Depends on…</option>
-            {allQuestions.filter((q) => q && q.id && q.id !== question.id).map((q) => (
-              <option key={q.id} value={q.id}>{q.label || q.id} — {q.id}</option>
-            ))}
-          </select>
-          <input
-            type="text"
-            placeholder="Equals value (comma for multiple)"
-            value={question.showIf?.equals || ''}
-            onChange={(e) => onUpdate(sectionId, question.id, { showIf: { ...(question.showIf || {}), equals: e.target.value } })}
-            style={{ flex: 1, minWidth: 220, padding: 6, border: '1px solid #e5e7eb', borderRadius: 4 }}
-          />
-          {question.showIf && (
-            <button
-              onClick={() => onUpdate(sectionId, question.id, { showIf: undefined })}
-              style={{ padding: '4px 8px', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: 4 }}
-            >
-              Clear
-            </button>
-          )}
+            {isExpanded ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </button>
+          <span className="text-lg">{typeInfo?.icon}</span>
+          <p className="text-sm font-medium truncate">{question.label || 'Untitled Question'}</p>
+          {question.required && <Badge variant="destructive" className="text-xs">Required</Badge>}
         </div>
+        <Button
+          onClick={(e) => {
+            e.stopPropagation()
+            onDelete(sectionId, question.id)
+          }}
+          variant="ghost"
+          size="sm"
+          className="text-destructive hover:bg-destructive/10"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
       </div>
 
-      {needsOptions && (
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <strong>Options:</strong>
-            <button
-              onClick={() => onAddOption(sectionId, question.id)}
-              style={{ padding: '4px 8px', background: '#10b981', color: 'white', border: 'none', borderRadius: 4 }}
+      {isExpanded && (
+        <CardContent className="space-y-4 border-t border-border/50 pt-4">
+          <div className="space-y-2">
+            <Label>Question Type</Label>
+            <Select
+              value={question.type}
+              onValueChange={(value) => onUpdate(sectionId, question.id, { type: value, options: needsOptions ? question.options : [] })}
             >
-              Add Option
-            </button>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {QUESTION_TYPES.map(type => (
+                  <SelectItem key={type.value} value={type.value}>
+                    <span className="flex items-center gap-2">
+                      <span>{type.icon}</span>
+                      <span>{type.label}</span>
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          {question.options?.map((option, index) => (
-            <div key={option.id} style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
-              <input
-                type="text"
-                value={option.label}
-                onChange={(e) => onUpdateOption(sectionId, question.id, option.id, { label: e.target.value, value: e.target.value })}
-                style={{ flex: 1, padding: 4, border: '1px solid #e5e7eb', borderRadius: 4 }}
-                placeholder={`Option ${index + 1}`}
-              />
-              <button
-                onClick={() => onDeleteOption(sectionId, question.id, option.id)}
-                style={{ padding: '4px 8px', background: '#ef4444', color: 'white', border: 'none', borderRadius: 4 }}
+
+          <div className="space-y-2">
+            <Label>Question Text</Label>
+            <Input
+              value={question.label}
+              onChange={(e) => onUpdate(sectionId, question.id, { label: e.target.value })}
+              placeholder="Enter question text"
+            />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Switch
+              id={`required-${question.id}`}
+              checked={question.required}
+              onCheckedChange={(checked) => onUpdate(sectionId, question.id, { required: checked })}
+            />
+            <Label htmlFor={`required-${question.id}`} className="cursor-pointer">
+              Required
+            </Label>
+          </div>
+
+          {/* Conditional visibility */}
+          <div className="space-y-2 rounded-md border border-border/50 bg-muted/30 p-3">
+            <Label className="text-xs text-muted-foreground">
+              Conditional Display (optional): Show this question only if another question matches a value
+            </Label>
+            <div className="flex flex-wrap gap-2">
+              <Select
+                value={question.showIf?.questionId || ''}
+                onValueChange={(value) => onUpdate(sectionId, question.id, { showIf: { ...(question.showIf || {}), questionId: value || undefined } })}
               >
-                ×
-              </button>
+                <SelectTrigger className="flex-1 min-w-[200px]">
+                  <SelectValue placeholder="Depends on…" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No dependency</SelectItem>
+                  {allQuestions.filter((q) => q && q.id && q.id !== question.id).map((q) => (
+                    <SelectItem key={q.id} value={q.id}>{q.label || q.id}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input
+                placeholder="Equals value (comma for multiple)"
+                value={question.showIf?.equals || ''}
+                onChange={(e) => onUpdate(sectionId, question.id, { showIf: { ...(question.showIf || {}), equals: e.target.value } })}
+                className="flex-1 min-w-[200px]"
+              />
+              {question.showIf && (
+                <Button
+                  onClick={() => onUpdate(sectionId, question.id, { showIf: undefined })}
+                  variant="ghost"
+                  size="sm"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
             </div>
-          ))}
-        </div>
-      )}
+          </div>
 
-      {question.type === 'numeric' && (
-        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-          <input
-            type="number"
-            placeholder="Min"
-            value={question.validation?.min || ''}
-            onChange={(e) => onUpdate(sectionId, question.id, { 
-              validation: { ...question.validation, min: e.target.value ? Number(e.target.value) : undefined }
-            })}
-            style={{ flex: 1, padding: 4, border: '1px solid #e5e7eb', borderRadius: 4 }}
-          />
-          <input
-            type="number"
-            placeholder="Max"
-            value={question.validation?.max || ''}
-            onChange={(e) => onUpdate(sectionId, question.id, { 
-              validation: { ...question.validation, max: e.target.value ? Number(e.target.value) : undefined }
-            })}
-            style={{ flex: 1, padding: 4, border: '1px solid #e5e7eb', borderRadius: 4 }}
-          />
-        </div>
-      )}
+          {needsOptions && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Options</Label>
+                <Button
+                  onClick={() => onAddOption(sectionId, question.id)}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Plus className="mr-2 h-3 w-3" />
+                  Add
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {question.options?.map((option, index) => (
+                  <div key={option.id} className="flex items-center gap-2">
+                    <Input
+                      value={option.label}
+                      onChange={(e) => onUpdateOption(sectionId, question.id, option.id, { label: e.target.value, value: e.target.value })}
+                      placeholder={`Option ${index + 1}`}
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={() => onDeleteOption(sectionId, question.id, option.id)}
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:bg-destructive/10"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-      {['short-text', 'long-text'].includes(question.type) && (
-        <div style={{ marginTop: 8 }}>
-          <input
-            type="number"
-            placeholder="Max length"
-            value={question.validation?.maxLength || ''}
-            onChange={(e) => onUpdate(sectionId, question.id, { 
-              validation: { ...question.validation, maxLength: e.target.value ? Number(e.target.value) : undefined }
-            })}
-            style={{ width: '100px', padding: 4, border: '1px solid #e5e7eb', borderRadius: 4 }}
-          />
-        </div>
+          {question.type === 'numeric' && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Min Value</Label>
+                <Input
+                  type="number"
+                  placeholder="No minimum"
+                  value={question.validation?.min ?? ''}
+                  onChange={(e) => onUpdate(sectionId, question.id, { 
+                    validation: { ...question.validation, min: e.target.value ? Number(e.target.value) : undefined }
+                  })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Max Value</Label>
+                <Input
+                  type="number"
+                  placeholder="No maximum"
+                  value={question.validation?.max ?? ''}
+                  onChange={(e) => onUpdate(sectionId, question.id, { 
+                    validation: { ...question.validation, max: e.target.value ? Number(e.target.value) : undefined }
+                  })}
+                />
+              </div>
+            </div>
+          )}
+
+          {['short-text', 'long-text'].includes(question.type) && (
+            <div className="space-y-2">
+              <Label>Max Length</Label>
+              <Input
+                type="number"
+                placeholder="No limit"
+                value={question.validation?.maxLength || ''}
+                onChange={(e) => onUpdate(sectionId, question.id, { 
+                  validation: { ...question.validation, maxLength: e.target.value ? Number(e.target.value) : undefined }
+                })}
+                className="w-32"
+              />
+            </div>
+          )}
+        </CardContent>
       )}
-    </div>
+    </Card>
   )
 }
 
@@ -474,22 +584,31 @@ function AssessmentPreview({ assessment }) {
   }
 
   if (!assessment.title) {
-    return <div style={{ color: '#6b7280', fontStyle: 'italic' }}>Start building your assessment to see the preview</div>
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <Eye className="h-12 w-12 text-muted-foreground/50 mb-4" />
+        <p className="text-sm text-muted-foreground italic">Start building your assessment to see the preview</p>
+      </div>
+    )
   }
 
   return (
-    <div>
-      <h3>{assessment.title}</h3>
-      {assessment.description && (
-        <p style={{ color: '#6b7280', marginBottom: 20 }}>{assessment.description}</p>
-      )}
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-xl font-semibold mb-2">{assessment.title}</h3>
+        {assessment.description && (
+          <p className="text-sm text-muted-foreground">{assessment.description}</p>
+        )}
+      </div>
 
       {(assessment.sections || []).map((section) => (
-        <div key={section.id} style={{ marginBottom: 30 }}>
-          <h4>{section.title}</h4>
-          {section.description && (
-            <p style={{ color: '#6b7280', marginBottom: 16 }}>{section.description}</p>
-          )}
+        <div key={section.id} className="space-y-4">
+          <div>
+            <h4 className="font-semibold text-base mb-1">{section.title}</h4>
+            {section.description && (
+              <p className="text-sm text-muted-foreground">{section.description}</p>
+            )}
+          </div>
 
           {(section.questions || []).map((question) => {
             const visible = (() => {
@@ -519,91 +638,93 @@ function AssessmentPreview({ assessment }) {
             })()
             if (!visible) return null
             return (
-              <div key={question.id} style={{ marginBottom: 20, padding: 16, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--card-bg)' }}>
-                <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
-                  {question.label}
-                  {question.required && <span style={{ color: 'var(--danger)' }}> *</span>}
-                </label>
+              <Card key={question.id} className="border-border/50 bg-background">
+                <CardContent className="pt-6">
+                  <Label className="mb-3 block text-base font-medium">
+                    {question.label}
+                    {question.required && <span className="text-destructive ml-1">*</span>}
+                  </Label>
 
-              {question.type === 'short-text' && (
-                <input
-                  type="text"
-                  value={responses[question.id] || ''}
-                  onChange={(e) => handleResponse(question.id, e.target.value)}
-                  style={{ width: '100%', padding: 8, border: '1px solid var(--border)', borderRadius: 4, background: 'var(--card-bg)', color: 'var(--text)' }}
-                  maxLength={question.validation?.maxLength}
-                />
-              )}
+                  {question.type === 'short-text' && (
+                    <Input
+                      value={responses[question.id] || ''}
+                      onChange={(e) => handleResponse(question.id, e.target.value)}
+                      maxLength={question.validation?.maxLength}
+                      placeholder="Your answer"
+                    />
+                  )}
 
-              {question.type === 'long-text' && (
-                <textarea
-                  value={responses[question.id] || ''}
-                  onChange={(e) => handleResponse(question.id, e.target.value)}
-                  style={{ width: '100%', padding: 8, border: '1px solid var(--border)', borderRadius: 4, minHeight: 80, background: 'var(--card-bg)', color: 'var(--text)' }}
-                  maxLength={question.validation?.maxLength}
-                />
-              )}
+                  {question.type === 'long-text' && (
+                    <Textarea
+                      value={responses[question.id] || ''}
+                      onChange={(e) => handleResponse(question.id, e.target.value)}
+                      maxLength={question.validation?.maxLength}
+                      placeholder="Your answer"
+                      className="min-h-[100px]"
+                    />
+                  )}
 
-              {question.type === 'numeric' && (
-                <input
-                  type="number"
-                  value={responses[question.id] || ''}
-                  onChange={(e) => handleResponse(question.id, e.target.value)}
-                  style={{ width: '200px', padding: 8, border: '1px solid var(--border)', borderRadius: 4, background: 'var(--card-bg)', color: 'var(--text)' }}
-                  min={question.validation?.min}
-                  max={question.validation?.max}
-                />
-              )}
+                  {question.type === 'numeric' && (
+                    <Input
+                      type="number"
+                      value={responses[question.id] || ''}
+                      onChange={(e) => handleResponse(question.id, e.target.value)}
+                      min={question.validation?.min}
+                      max={question.validation?.max}
+                      placeholder="Enter a number"
+                      className="w-48"
+                    />
+                  )}
 
-              {question.type === 'single-choice' && (
-                <div>
-                  {question.options?.map((option) => (
-                    <label key={option.id} style={{ display: 'block', marginBottom: 8 }}>
-                      <input
-                        type="radio"
-                        name={question.id}
-                        value={option.value}
-                        checked={responses[question.id] === option.value}
-                        onChange={(e) => handleResponse(question.id, e.target.value)}
-                        style={{ marginRight: 8 }}
-                      />
-                      {option.label}
-                    </label>
-                  ))}
-                </div>
-              )}
+                  {question.type === 'single-choice' && (
+                    <div className="space-y-2">
+                      {question.options?.map((option) => (
+                        <label key={option.id} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name={question.id}
+                            value={option.value}
+                            checked={responses[question.id] === option.value}
+                            onChange={(e) => handleResponse(question.id, e.target.value)}
+                            className="h-4 w-4"
+                          />
+                          <span className="text-sm">{option.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
 
-              {question.type === 'multi-choice' && (
-                <div>
-                  {question.options?.map((option) => (
-                    <label key={option.id} style={{ display: 'block', marginBottom: 8 }}>
-                      <input
-                        type="checkbox"
-                        value={option.value}
-                        checked={(responses[question.id] || []).includes(option.value)}
-                        onChange={(e) => {
-                          const current = responses[question.id] || []
-                          const updated = e.target.checked
-                            ? [...current, option.value]
-                            : current.filter(v => v !== option.value)
-                          handleResponse(question.id, updated)
-                        }}
-                        style={{ marginRight: 8 }}
-                      />
-                      {option.label}
-                    </label>
-                  ))}
-                </div>
-              )}
+                  {question.type === 'multi-choice' && (
+                    <div className="space-y-2">
+                      {question.options?.map((option) => (
+                        <label key={option.id} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            value={option.value}
+                            checked={(responses[question.id] || []).includes(option.value)}
+                            onChange={(e) => {
+                              const current = responses[question.id] || []
+                              const updated = e.target.checked
+                                ? [...current, option.value]
+                                : current.filter(v => v !== option.value)
+                              handleResponse(question.id, updated)
+                            }}
+                            className="h-4 w-4 rounded"
+                          />
+                          <span className="text-sm">{option.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
 
-              {question.type === 'file-upload' && (
-                <input
-                  type="file"
-                  onChange={(e) => handleResponse(question.id, e.target.files[0]?.name || '')}
-                  style={{ width: '100%', padding: 8, border: '1px solid #e5e7eb', borderRadius: 4 }}
-                />
-              )}
-            </div>
+                  {question.type === 'file-upload' && (
+                    <Input
+                      type="file"
+                      onChange={(e) => handleResponse(question.id, e.target.files[0]?.name || '')}
+                    />
+                  )}
+                </CardContent>
+              </Card>
             )
           })}
         </div>
