@@ -168,3 +168,6 @@ firebase-debug.log
 # Temporary files
 .tmp/
 .temp/
+
+
+*.readme

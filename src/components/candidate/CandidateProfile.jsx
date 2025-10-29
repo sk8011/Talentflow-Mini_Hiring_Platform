@@ -2,6 +2,11 @@ import React, { useState, useEffect, useRef } from 'react'
 import { sendInviteEmail } from '../../lib/email'
 import { useParams, useNavigate } from 'react-router-dom'
 import { CANDIDATE_STAGES } from '../../lib/storage'
+import { Button } from '../ui/Button'
+import { Input } from '../ui/Input'
+import { Badge } from '../ui/Badge'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card'
+import { ArrowLeft, Mail, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react'
 
 export default function CandidateProfile({ addToast }) {
   const { candidateId } = useParams()
@@ -329,261 +334,284 @@ export default function CandidateProfile({ addToast }) {
   }
 
   if (loading) {
-    return <div style={{ padding: 20 }}>Loading candidate profile...</div>
+    return <div className="p-6 text-center text-muted-foreground">Loading candidate profile...</div>
   }
 
   if (!candidate) {
     return (
-      <div style={{ padding: 20 }}>
-        <h2>Candidate Not Found</h2>
-        <button onClick={() => navigate('/candidates')}>Back to Candidates</button>
-      </div>
+      <Card className="p-6 m-6">
+        <h2 className="text-2xl font-bold mb-4">Candidate Not Found</h2>
+        <Button onClick={() => navigate('/candidates')}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Candidates
+        </Button>
+      </Card>
     )
   }
 
   return (
-    <div style={{ padding: 20, maxWidth: 1200, margin: '0 auto' }}>
+    <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div style={{ marginBottom: 24 }}>
-        <button 
-          className="btn"
+      <div className="mb-6">
+        <Button 
+          variant="ghost"
           onClick={() => navigate('/hr/candidates')}
-          style={{ marginBottom: 16 }}
+          className="mb-4"
         >
-          ← Back to Candidates
-        </button>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Candidates
+        </Button>
         
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-          <div>
-            <h1 style={{ margin: 0, marginBottom: 8 }}>{candidate.name}</h1>
-            <div style={{ color: '#6b7280', marginBottom: 8 }}>{candidate.email}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{
-                width: 12,
-                height: 12,
-                borderRadius: '50%',
-                backgroundColor: getStatusColor(candidate.stage || 'Applied')
-              }} />
-              <span style={{ fontWeight: 500 }}>
-                Current Stage: {candidate.stage || 'Applied'}
-              </span>
+        <Card className="p-6">
+          <div className="flex justify-between items-start flex-wrap gap-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">{candidate.name}</h1>
+              <div className="text-muted-foreground mb-3">{candidate.email}</div>
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-3 h-3 rounded-full"
+                  style={{
+                    backgroundColor: getStatusColor(candidate.stage || 'Applied')
+                  }}
+                />
+                <span className="font-medium text-sm">
+                  Current Stage: {candidate.stage || 'Applied'}
+                </span>
+              </div>
             </div>
-          </div>
-          
-          <div style={{ display: 'flex', gap: 8 }}>
-            <select
-              value={candidate.stage || CANDIDATE_STAGES[0]}
-              onChange={(e) => updateStage(e.target.value)}
-              className="select"
-            >
-              {CANDIDATE_STAGES.map((stage) => (
-                <option key={stage} value={stage}>{stage}</option>
-              ))}
-            </select>
-            <button className="btn" onClick={inviteCandidate}>Invite (send password)</button>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
-        {/* Main Content */}
-        <div>
-          {/* Candidate Details */}
-          <div className="card" style={{ padding: 20, marginBottom: 24 }}>
-            <h2 style={{ marginTop: 0 }}>Candidate Information</h2>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <div>
-                <label style={{ display: 'block', fontWeight: 500, marginBottom: 4 }}>
-                  Full Name
-                </label>
-                <div className="card" style={{ padding: 8 }}>
-                  {candidate.name}
-                </div>
-              </div>
-              
-              <div>
-                <label style={{ display: 'block', fontWeight: 500, marginBottom: 4 }}>
-                  Email
-                </label>
-                <div className="card" style={{ padding: 8 }}>
-                  {candidate.email}
-                </div>
-              </div>
-              
-              <div>
-                <label style={{ display: 'block', fontWeight: 500, marginBottom: 4 }}>
-                  Job ID
-                </label>
-                <div className="card" style={{ padding: 8 }}>
-                  {candidate.jobId || 'Not specified'}
-                </div>
-              </div>
-              
-              <div>
-                <label style={{ display: 'block', fontWeight: 500, marginBottom: 4 }}>
-                  Candidate ID
-                </label>
-                <div className="card" style={{ padding: 8 }}>
-                  {candidate.id}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Assignment */}
-          <div className="card" style={{ padding: 20, marginBottom: 24 }}>
-            <h3 style={{ marginTop: 0 }}>Assessment Assignment</h3>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-              <label>Select job with built assessment:</label>
-              <select value={selectedJobId} onChange={(e) => setSelectedJobId(e.target.value)} className="select">
-                <option value="">-- Choose --</option>
-                {assignableJobs.map((j) => (
-                  <option key={j.id} value={j.id}>{j.title}</option>
+            <div className="flex gap-2 flex-wrap">
+              <select
+                value={candidate.stage || CANDIDATE_STAGES[0]}
+                onChange={(e) => updateStage(e.target.value)}
+                className="h-10 w-40 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                {CANDIDATE_STAGES.map((stage) => (
+                  <option key={stage} value={stage}>{stage}</option>
                 ))}
               </select>
-              <button className="btn btn-primary" onClick={assignAssessment} disabled={assignLoading}>
-                {assignLoading ? 'Assigning…' : 'Assign'}
-              </button>
-              <span className="badge badge-gray">Current: {assignments && assignments.length ? (assignableJobs.find((j) => String(j.id) === String(assignments[0]))?.title || assignments[0]) : 'None'}</span>
+              <Button onClick={inviteCandidate}>
+                <Mail className="h-4 w-4 mr-2" />
+                Invite
+              </Button>
             </div>
           </div>
+        </Card>
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Candidate Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Candidate Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-muted-foreground">
+                    Full Name
+                  </label>
+                  <div className="p-3 bg-muted rounded-md text-sm">
+                    {candidate.name}
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-muted-foreground">
+                    Email
+                  </label>
+                  <div className="p-3 bg-muted rounded-md text-sm">
+                    {candidate.email}
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-muted-foreground">
+                    Job ID
+                  </label>
+                  <div className="p-3 bg-muted rounded-md text-sm">
+                    {candidate.jobId || 'Not specified'}
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-muted-foreground">
+                    Candidate ID
+                  </label>
+                  <div className="p-3 bg-muted rounded-md text-sm">
+                    {candidate.id}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Assignment */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Assessment Assignment</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-3 items-center flex-wrap">
+                <label className="text-sm font-medium">Select job with built assessment:</label>
+                <select 
+                  value={selectedJobId} 
+                  onChange={(e) => setSelectedJobId(e.target.value)} 
+                  className="h-10 w-64 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <option value="">-- Choose --</option>
+                  {assignableJobs.map((j) => (
+                    <option key={j.id} value={j.id}>{j.title}</option>
+                  ))}
+                </select>
+                <Button onClick={assignAssessment} disabled={assignLoading}>
+                  {assignLoading ? 'Assigning…' : 'Assign'}
+                </Button>
+                <Badge variant="secondary">Current: {assignments && assignments.length ? (assignableJobs.find((j) => String(j.id) === String(assignments[0]))?.title || assignments[0]) : 'None'}</Badge>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Submissions */}
-          <div className="card" style={{ padding: 20, marginBottom: 24 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ marginTop: 0, marginBottom: 0 }}>Assessment Submissions</h3>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <span className="badge badge-gray">Current: {assignments && assignments.length ? (assignableJobs.find((j) => String(j.id) === String(assignments[0]))?.title || assignments[0]) : 'None'}</span>
-                <button className="btn" onClick={() => { if (assignments && assignments[0]) loadSubmissionsForJob(assignments[0]) }}>Refresh</button>
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle>Assessment Submissions</CardTitle>
+                <div className="flex gap-2 items-center">
+                  <Badge variant="secondary">Current: {assignments && assignments.length ? (assignableJobs.find((j) => String(j.id) === String(assignments[0]))?.title || assignments[0]) : 'None'}</Badge>
+                  <Button variant="outline" size="sm" onClick={() => { if (assignments && assignments[0]) loadSubmissionsForJob(assignments[0]) }}>
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-            </div>
-            {(!submissions || submissions.length === 0) ? (
-              <div className="muted">No submissions yet.</div>
-            ) : (
-              <div style={{ display: 'grid', gap: 8 }}>
-                {submissions.sort((a,b)=> (b.at||0)-(a.at||0)).map((s) => (
-                  <div key={s.id} className="card" style={{ padding: 12 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <div>Submission {s.id}</div>
-                      <div className="muted">{new Date(s.at).toLocaleString()}</div>
-                    </div>
-                    <details style={{ marginTop: 8 }}>
-                      <summary>View answers</summary>
-                      <div style={{ marginTop: 8, display: 'grid', gap: 6 }}>
-                        {Object.entries(s.responses || {}).map(([qid, val]) => {
-                          const label = (questionLabelsByJob[assignments?.[0]] || {})[qid] || qid
-                          let display = ''
-                          if (Array.isArray(val)) display = val.join(', ')
-                          else if (typeof val === 'object' && val !== null) display = JSON.stringify(val)
-                          else display = String(val)
-                          return (
-                            <div key={qid} className="card" style={{ padding: 8 }}>
-                              <div style={{ fontWeight: 500 }}>{label}</div>
-                              <div className="muted" style={{ fontSize: 13, marginTop: 4 }}>{display || '—'}</div>
-                            </div>
-                          )
-                        })}
+            </CardHeader>
+            <CardContent>
+              {(!submissions || submissions.length === 0) ? (
+                <div className="text-muted-foreground text-sm">No submissions yet.</div>
+              ) : (
+                <div className="space-y-3">
+                  {submissions.sort((a,b)=> (b.at||0)-(a.at||0)).map((s) => (
+                    <Card key={s.id} className="p-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <div className="font-medium">Submission {s.id}</div>
+                        <div className="text-xs text-muted-foreground">{new Date(s.at).toLocaleString()}</div>
                       </div>
-                    </details>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Notes Section */}
-          <div className="card" style={{ padding: 20, marginBottom: 24 }}>
-            <h3 style={{ marginTop: 0 }}>Notes</h3>
-            
-            {/* Add Note */}
-            <div style={{ marginBottom: 16 }}>
-              <textarea
-                value={newNote}
-                onChange={(e) => { setNewNote(e.target.value); computeMentionState(e.target.value) }}
-                onKeyDown={(e) => {
-                  if (!mentionOpen) return
-                  const matches = teamMembers.filter((u) => u.toLowerCase().startsWith((mentionQuery||'').toLowerCase())).slice(0, 5)
-                  if (!matches.length) return
-                  if (e.key === 'ArrowDown') { e.preventDefault(); setMentionIndex((i) => (i + 1) % matches.length); }
-                  else if (e.key === 'ArrowUp') { e.preventDefault(); setMentionIndex((i) => (i - 1 + matches.length) % matches.length); }
-                  else if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); insertMention(matches[mentionIndex] || matches[0]); }
-                  else if (e.key === 'Escape') { setMentionOpen(false) }
-                }}
-                placeholder="Add a note about this candidate... Use @mentions to reference team members"
-                style={{ 
-                  width: '100%', 
-                  padding: 12, 
-                  border: '1px solid var(--border)', 
-                  borderRadius: 6,
-                  minHeight: 80,
-                  resize: 'vertical',
-                  background: 'var(--card-bg)',
-                  color: 'var(--text)'
-                }}
-              />
-              {mentionOpen && (
-                <div style={{ marginTop: 6, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--card-bg)', maxWidth: 360, boxShadow: '0 8px 20px rgba(0,0,0,0.06)' }}>
-                  {teamMembers.filter((u) => u.toLowerCase().startsWith((mentionQuery||'').toLowerCase())).slice(0, 5).map((name, idx) => (
-                    <div key={name} style={{ padding: '6px 10px', cursor: 'pointer', background: idx === mentionIndex ? 'rgba(59,130,246,0.12)' : 'transparent' }} onMouseDown={(e) => { e.preventDefault(); insertMention(name) }} onMouseEnter={() => setMentionIndex(idx)}>
-                      @{name}
-                    </div>
+                      <details className="mt-2">
+                        <summary className="cursor-pointer text-sm font-medium text-primary hover:underline">View answers</summary>
+                        <div className="mt-3 space-y-2">
+                          {Object.entries(s.responses || {}).map(([qid, val]) => {
+                            const label = (questionLabelsByJob[assignments?.[0]] || {})[qid] || qid
+                            let display = ''
+                            if (Array.isArray(val)) display = val.join(', ')
+                            else if (typeof val === 'object' && val !== null) display = JSON.stringify(val)
+                            else display = String(val)
+                            return (
+                              <div key={qid} className="p-3 bg-muted rounded-md">
+                                <div className="font-medium text-sm">{label}</div>
+                                <div className="text-xs text-muted-foreground mt-1">{display || '—'}</div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </details>
+                    </Card>
                   ))}
                 </div>
               )}
-              <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div className="muted" style={{ fontSize: 12 }}>
-                  Tip: Use @john, @sarah, @mike to mention team members
-                </div>
-                <button
-                  onClick={addNote}
-                  disabled={!newNote.trim() || addingNote}
-                  style={{ 
-                    padding: '8px 16px', 
-                    backgroundColor: 'var(--accent)', 
-                    color: '#fff', 
-                    border: 'none', 
-                    borderRadius: 6,
-                    opacity: (!newNote.trim() || addingNote) ? 0.5 : 1
-                  }}
-                >
-                  {addingNote ? 'Adding...' : 'Add Note'}
-                </button>
-              </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            {/* Existing Notes */}
-            {candidate.notes ? (
-              <div className="card" style={{ padding: 12, whiteSpace: 'pre-wrap' }}>
-                {renderNotesWithMentions(candidate.notes)}
+          {/* Notes Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Notes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {/* Add Note */}
+              <div className="mb-4">
+                <textarea
+                  value={newNote}
+                  onChange={(e) => { setNewNote(e.target.value); computeMentionState(e.target.value) }}
+                  onKeyDown={(e) => {
+                    if (!mentionOpen) return
+                    const matches = teamMembers.filter((u) => u.toLowerCase().startsWith((mentionQuery||'').toLowerCase())).slice(0, 5)
+                    if (!matches.length) return
+                    if (e.key === 'ArrowDown') { e.preventDefault(); setMentionIndex((i) => (i + 1) % matches.length); }
+                    else if (e.key === 'ArrowUp') { e.preventDefault(); setMentionIndex((i) => (i - 1 + matches.length) % matches.length); }
+                    else if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); insertMention(matches[mentionIndex] || matches[0]); }
+                    else if (e.key === 'Escape') { setMentionOpen(false) }
+                  }}
+                  placeholder="Add a note about this candidate... Use @mentions to reference team members"
+                  className="w-full p-3 border border-input rounded-md min-h-[80px] resize-y bg-background text-foreground"
+                />
+                {mentionOpen && (
+                  <div className="mt-2 border rounded-md bg-card max-w-sm shadow-lg">
+                    {teamMembers.filter((u) => u.toLowerCase().startsWith((mentionQuery||'').toLowerCase())).slice(0, 5).map((name, idx) => (
+                      <div
+                        key={name}
+                        className={`px-3 py-2 cursor-pointer transition-colors ${
+                          idx === mentionIndex ? 'bg-primary/10' : 'hover:bg-accent'
+                        }`}
+                        onMouseDown={(e) => { e.preventDefault(); insertMention(name) }}
+                        onMouseEnter={() => setMentionIndex(idx)}
+                      >
+                        @{name}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="mt-2 flex justify-between items-center">
+                  <div className="text-xs text-muted-foreground">
+                    Tip: Use @john, @sarah, @mike to mention team members
+                  </div>
+                  <Button
+                    onClick={addNote}
+                    disabled={!newNote.trim() || addingNote}
+                    size="sm"
+                  >
+                    {addingNote ? 'Adding...' : 'Add Note'}
+                  </Button>
+                </div>
               </div>
-            ) : (
-              <div className="card" style={{ padding: 12, fontStyle: 'italic' }}>
-                No notes yet. Add the first note above.
-              </div>
-            )}
-          </div>
+
+              {/* Existing Notes */}
+              {candidate.notes ? (
+                <div className="p-4 bg-muted rounded-md whitespace-pre-wrap">
+                  {renderNotesWithMentions(candidate.notes)}
+                </div>
+              ) : (
+                <div className="p-4 bg-muted rounded-md italic text-sm text-muted-foreground">
+                  No notes yet. Add the first note above.
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Timeline Sidebar */}
         <div>
-          <div className="card" style={{ padding: 20, position: 'sticky', top: 20 }}>
-            <h3 style={{ marginTop: 0 }}>Timeline</h3>
-            
-            {timeline.length === 0 ? (
-              <div className="muted" style={{ fontStyle: 'italic' }}>
-                No timeline events yet
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {timeline
-                  .sort((a, b) => (b.at || 0) - (a.at || 0))
-                  .map((event, index) => (
-                    <TimelineEvent key={index} event={event} jobMap={jobMap} />
-                  ))}
-              </div>
-            )}
-          </div>
+          <Card className="sticky top-20">
+            <CardHeader>
+              <CardTitle>Timeline</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {timeline.length === 0 ? (
+                <div className="text-sm italic text-muted-foreground">
+                  No timeline events yet
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {timeline
+                    .sort((a, b) => (b.at || 0) - (a.at || 0))
+                    .map((event, index) => (
+                      <TimelineEvent key={index} event={event} jobMap={jobMap} />
+                    ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
@@ -634,22 +662,15 @@ function TimelineEvent({ event, jobMap = {} }) {
   }
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      gap: 12, 
-      padding: 12, 
-      backgroundColor: 'var(--card-bg)', 
-      borderRadius: 6,
-      border: '1px solid var(--border)'
-    }}>
-      <div style={{ fontSize: 16, flexShrink: 0 }}>
+    <div className="flex gap-3 p-3 bg-card rounded-lg border">
+      <div className="text-base flex-shrink-0">
         {getEventIcon(event.type)}
       </div>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 14, marginBottom: 4 }}>
+      <div className="flex-1 min-w-0">
+        <div className="text-sm mb-1">
           {getEventDescription(event)}
         </div>
-        <div className="muted" style={{ fontSize: 12 }}>
+        <div className="text-xs text-muted-foreground">
           {formatDate(event.at)}
         </div>
       </div>
@@ -672,13 +693,7 @@ function renderNotesWithMentions(notes) {
             return (
               <span
                 key={index}
-                style={{
-                  backgroundColor: '#dbeafe',
-                  color: '#1e40af',
-                  padding: '2px 4px',
-                  borderRadius: 4,
-                  fontWeight: 500,
-                }}
+                className="bg-primary/10 text-primary px-1 py-0.5 rounded font-medium"
               >
                 @{part}
               </span>

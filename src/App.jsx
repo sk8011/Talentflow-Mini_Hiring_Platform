@@ -14,6 +14,11 @@ import ConfirmDialog from './components/common/ConfirmDialog'
 import Toast from './components/common/Toast'
 import { Routes, Route, useParams, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import ArchivedList from './components/jobs/ArchivedList'
+import { Button } from './components/ui/Button'
+import { Input } from './components/ui/Input'
+import { Label } from './components/ui/Label'
+import { Badge } from './components/ui/Badge'
+import { Briefcase, Users, LayoutGrid, FileText, Moon, Sun, LogOut, Home, Edit2, Play, ArrowLeft } from 'lucide-react'
 
 // Hoisted HRGate to module scope so its identity is stable across App re-renders
 const HRGate = ({ children }) => {
@@ -141,18 +146,30 @@ function CandidatesRoute({ addToast, pendingIds, addPending, removePending }) {
   })
 
   return (
-    <div>
-      <h2>Candidates</h2>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight mb-2">Candidates</h2>
+        <p className="text-muted-foreground">Manage and track all your candidates</p>
+      </div>
+      
+      <div className="flex gap-3 items-start flex-wrap p-4 bg-card border rounded-lg">
         <CandidateForm onAdd={async (c) => { const result = await handleAdd(c); if (result?.ok && result.candidate) setSelectedId(String(result.candidate.id)); return result }} />
-        <input
+      </div>
+      
+      <div className="flex gap-3 items-center flex-wrap">
+        <Input
           placeholder="Search name or email"
           value={searchQ}
           onChange={(e) => setSearchQ(e.target.value)}
-          style={{ padding: 8, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--card-bg)', color: 'var(--text)' }}
+          className="w-64"
         />
-        <label style={{ marginLeft: 8 }}>Filter stage:
-          <select value={stageFilter} onChange={(e) => setStageFilter(e.target.value)} style={{ marginLeft: 6 }}>
+        <div className="flex items-center gap-2">
+          <Label className="text-sm font-medium">Filter stage:</Label>
+          <select 
+            value={stageFilter} 
+            onChange={(e) => setStageFilter(e.target.value)} 
+            className="h-9 w-40 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
             <option>All</option>
             <option>Applied</option>
             <option>Phone Screen</option>
@@ -161,32 +178,52 @@ function CandidatesRoute({ addToast, pendingIds, addPending, removePending }) {
             <option>Hired</option>
             <option>Rejected</option>
           </select>
-        </label>
-        <label>Sort by:
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ marginLeft: 6 }}>
+        </div>
+        <div className="flex items-center gap-2">
+          <Label className="text-sm font-medium">Sort by:</Label>
+          <select 
+            value={sortBy} 
+            onChange={(e) => setSortBy(e.target.value)} 
+            className="h-9 w-32 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
             <option value="name">Name</option>
             <option value="stage">Stage</option>
           </select>
-        </label>
+        </div>
       </div>
-      <div style={{ marginBottom: 10, display: 'flex', gap: 8, alignItems: 'center' }}>
-        <div style={{ fontSize: 13 }}><strong>Selected:</strong> {selectedIds.length}</div>
-        <label style={{ fontSize: 13 }}>Move selected to:
-          <select id="bulk-stage" style={{ marginLeft: 6 }}>
-            <option>Phone Screen</option>
-            <option>Onsite</option>
-            <option>Offer</option>
-            <option>Hired</option>
-            <option>Rejected</option>
-          </select>
-        </label>
-        <button disabled={bulkRunning} onClick={() => {
-          const el = document.getElementById('bulk-stage')
-          const stage = el && el.value
-          if (!stage || selectedIds.length === 0) return
-          setConfirmOpen(true)
-        }}>{bulkRunning ? `Applying (${bulkProgress.done}/${bulkProgress.total})` : 'Apply'}</button>
-      </div>
+      
+      {selectedIds.length > 0 && (
+        <div className="flex gap-3 items-center p-4 bg-primary/5 border border-primary/20 rounded-lg">
+          <Badge variant="secondary" className="text-sm">
+            {selectedIds.length} selected
+          </Badge>
+          <div className="flex items-center gap-2">
+            <Label className="text-sm font-medium">Move to:</Label>
+            <select 
+              id="bulk-stage" 
+              className="h-9 w-40 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <option>Phone Screen</option>
+              <option>Onsite</option>
+              <option>Offer</option>
+              <option>Hired</option>
+              <option>Rejected</option>
+            </select>
+          </div>
+          <Button 
+            disabled={bulkRunning} 
+            size="sm"
+            onClick={() => {
+              const el = document.getElementById('bulk-stage')
+              const stage = el && el.value
+              if (!stage || selectedIds.length === 0) return
+              setConfirmOpen(true)
+            }}
+          >
+            {bulkRunning ? `Applying (${bulkProgress.done}/${bulkProgress.total})` : 'Apply Changes'}
+          </Button>
+        </div>
+      )}
       <VirtualizedCandidateList 
         candidates={sorted} 
         loading={loading} 
@@ -266,8 +303,11 @@ function KanbanRoute({ addToast, pendingIds, addPending, removePending }) {
   }
 
   return (
-    <div>
-      <h2>Kanban Board</h2>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight mb-2">Kanban Board</h2>
+        <p className="text-muted-foreground">Drag and drop candidates across hiring stages</p>
+      </div>
       <KanbanBoard candidates={candidates} onUpdateCandidate={(id, updates) => handleUpdate(id, updates)} loading={loading} />
     </div>
   )
@@ -286,9 +326,12 @@ export default function App() {
 
   // Apply theme class to body and persist
   useEffect(() => {
-    const cls = 'theme-dark'
-    if (theme === 'dark') document.body.classList.add(cls)
-    else document.body.classList.remove(cls)
+    const root = document.documentElement
+    if (theme === 'dark') {
+      root.classList.add('dark')
+    } else {
+      root.classList.remove('dark')
+    }
     localStorage.setItem('theme', theme)
   }, [theme])
 
@@ -379,21 +422,83 @@ export default function App() {
     const location = useLocation()
     const inHR = location.pathname.startsWith('/hr')
     return (
-      <div>
-        <h2>Assessments</h2>
-        <p className="muted">Select a job to build or edit its assessment.</p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
-          {jobs.map((j) => (
-            <div key={j.id} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12, background: 'var(--card-bg)' }}>
-              <div style={{ fontWeight: 600, color: 'var(--text)' }}>{j.title}</div>
-              <div className="muted" style={{ fontSize: 12, marginBottom: 8 }}>ID: {j.id}</div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button className="btn" onClick={() => navigate(`${inHR ? '/hr' : ''}/assessments/${j.id}`)}>Open Builder</button>
-                <button className="btn" onClick={() => navigate(`${inHR ? '/hr' : '/candidate'}/assessments/${j.id}/run`)}>Run</button>
-              </div>
-            </div>
-          ))}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight mb-2">Assessments</h2>
+            <p className="text-muted-foreground">Build and manage assessments for your job openings</p>
+          </div>
+          <Badge variant="secondary" className="text-sm">
+            {jobs.length} {jobs.length === 1 ? 'Job' : 'Jobs'}
+          </Badge>
         </div>
+        
+        {jobs.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 px-4 border-2 border-dashed border-border/50 rounded-lg bg-muted/20">
+            <FileText className="h-16 w-16 text-muted-foreground/50 mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No jobs available</h3>
+            <p className="text-sm text-muted-foreground text-center max-w-sm">
+              Create a job posting first to build assessments
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {jobs.map((j) => (
+              <div 
+                key={j.id} 
+                className="group relative overflow-hidden rounded-xl border border-border/50 bg-gradient-to-br from-card to-card/50 p-6 transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1"
+              >
+                {/* Decorative gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                
+                <div className="relative space-y-4">
+                  {/* Header */}
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-lg bg-primary/10 p-2.5 group-hover:bg-primary/20 transition-colors">
+                        <FileText className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-base mb-1 line-clamp-2 group-hover:text-primary transition-colors">
+                          {j.title}
+                        </h3>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span className="truncate">{j.company || 'Company'}</span>
+                          <span>•</span>
+                          <span className="truncate">{j.location || 'Location'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Divider */}
+                  <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+                  
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 group-hover:border-primary/50 transition-colors"
+                      onClick={() => navigate(`${inHR ? '/hr' : ''}/assessments/${j.id}`)}
+                    >
+                      <Edit2 className="h-3.5 w-3.5 mr-1.5" />
+                      Builder
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => navigate(`${inHR ? '/hr' : '/candidate'}/assessments/${j.id}/run`)}
+                    >
+                      <Play className="h-3.5 w-3.5 mr-1.5" />
+                      Run
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     )
   }
@@ -404,10 +509,24 @@ export default function App() {
     const location = useLocation()
     const inHR = location.pathname.startsWith('/hr')
     return (
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <h2>Assessment Builder</h2>
-          <button onClick={() => navigate(inHR ? '/hr/assessments' : '/assessments')}>Back to Assessments</button>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-primary/10 p-2.5">
+              <FileText className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight">Assessment Builder</h2>
+              <p className="text-sm text-muted-foreground">Create and customize your assessment</p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => navigate(inHR ? '/hr/assessments' : '/assessments')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Assessments
+          </Button>
         </div>
         <AssessmentBuilder 
           jobId={jobId} 
@@ -424,10 +543,24 @@ export default function App() {
     const location = useLocation()
     const inHR = location.pathname.startsWith('/hr')
     return (
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <h2>Assessment</h2>
-          <button onClick={() => navigate(inHR ? '/hr/assessments' : '/candidate')}>Back</button>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-primary/10 p-2.5">
+              <FileText className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight">Take Assessment</h2>
+              <p className="text-sm text-muted-foreground">Complete all required questions</p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => navigate(inHR ? '/hr/assessments' : '/candidate')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
         </div>
         <AssessmentRunner jobId={jobId} onDone={() => navigate(inHR ? '/hr/assessments' : '/candidate')} />
       </div>
@@ -601,7 +734,7 @@ export default function App() {
   // (removed unused candidate helpers)
 
   return (
-    <div className="container">
+    <div className="min-h-screen bg-background">
       {/* Mobile-only blocker overlay (hidden on >=768px via CSS) */}
       <div className="mobile-blocker">
         <div className="inner">
@@ -615,47 +748,95 @@ export default function App() {
           </div>
         </div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-        <h1 style={{ margin: 0 }}>TalentFlow — Mini Hiring Platform</h1>
-        <button className="btn" onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))} title="Toggle theme" aria-label="Toggle theme">
-          {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
-        </button>
-      </div>
-      <div style={{ marginBottom: 12, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <button className="btn" onClick={() => navigate('/')}>Home</button>
-          {location.pathname.startsWith('/hr') && (
-            <> 
-              <button className="btn" onClick={() => navigate('/hr')}>Jobs</button>
-              <button className="btn" onClick={() => navigate('/hr/candidates')}>Candidates</button>
-              <button className="btn" onClick={() => navigate('/hr/kanban')}>Kanban</button>
-              <button className="btn" onClick={() => navigate('/hr/assessments')}>Assessments</button>
-            </>
-          )}
-          {location.pathname.startsWith('/candidate') && (
-            <> 
-              <button className="btn" onClick={() => navigate('/candidate')}>Candidate Portal</button>
-            </>
-          )}
+      
+      {/* Modern Navigation Bar */}
+      <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto flex h-16 items-center px-4">
+          <div className="flex items-center gap-2 mr-6">
+            <Briefcase className="h-6 w-6 text-primary" />
+            <span className="font-bold text-xl bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+              TalentFlow
+            </span>
+          </div>
+          
+          <div className="flex items-center gap-2 flex-1">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+              <Home className="h-4 w-4 mr-2" />
+              Home
+            </Button>
+            {location.pathname.startsWith('/hr') && (
+              <>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/hr')}>
+                  <Briefcase className="h-4 w-4 mr-2" />
+                  Jobs
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/hr/candidates')}>
+                  <Users className="h-4 w-4 mr-2" />
+                  Candidates
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/hr/kanban')}>
+                  <LayoutGrid className="h-4 w-4 mr-2" />
+                  Kanban
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/hr/assessments')}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Assessments
+                </Button>
+              </>
+            )}
+            {location.pathname.startsWith('/candidate') && (
+              <Button variant="ghost" size="sm" onClick={() => navigate('/candidate')}>
+                <Users className="h-4 w-4 mr-2" />
+                Candidate Portal
+              </Button>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+              title="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+            {location.pathname.startsWith('/hr') && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => { localStorage.removeItem('hr_session'); navigate('/hr/login') }}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            )}
+          </div>
         </div>
-        {location.pathname.startsWith('/hr') && (
-          <div style={{ marginLeft: 'auto' }}>
-            <button className="btn btn-muted" onClick={() => { localStorage.removeItem('hr_session'); navigate('/hr/login') }}>HR Logout</button>
+      </nav>
+      
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-6">
+        {location.pathname === '/hr' && (
+          <div className="flex gap-3 items-center mb-6">
+            <input
+              placeholder="Search title or company"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="flex h-10 w-full max-w-sm rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            />
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <option>All</option>
+              <option>Full-time</option>
+              <option>Part-time</option>
+              <option>Contract</option>
+            </select>
           </div>
         )}
-      </div>
-      {location.pathname === '/hr' && (
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
-          <input placeholder="Search title or company" value={query} onChange={(e) => setQuery(e.target.value)} style={{ padding: 8, borderRadius: 6, border: '1px solid #e5e7eb' }} />
-          <select value={filterType} onChange={(e) => setFilterType(e.target.value)} style={{ padding: 8, borderRadius: 6 }}>
-            <option>All</option>
-            <option>Full-time</option>
-            <option>Part-time</option>
-            <option>Contract</option>
-          </select>
-        </div>
-      )}
-      {/* landing and portals */}
         <Routes>
           <Route path="/" element={<Landing />} />
           {/* HR auth */}
@@ -674,6 +855,8 @@ export default function App() {
           <Route path="/candidate/login" element={<CandidateLogin />} />
           <Route path="/candidate/assessments/:jobId/run" element={<AssessmentRunnerRoute />} />
         </Routes>
+      </main>
+      
       <Toast toasts={toasts} onRemove={(id) => setToasts((t) => t.filter((x) => x.id !== id))} autoDismiss={true} expirationInterval={3000} />
     </div>
   )

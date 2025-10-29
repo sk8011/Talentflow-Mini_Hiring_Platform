@@ -1,5 +1,8 @@
 import React, { useState } from 'react'
 import { CANDIDATE_STAGES } from '../../lib/storage'
+import { Button } from '../ui/Button'
+import { Input } from '../ui/Input'
+import { UserPlus } from 'lucide-react'
 
 export default function CandidateForm({ onAdd }) {
   const [name, setName] = useState('')
@@ -23,16 +26,34 @@ export default function CandidateForm({ onAdd }) {
   }
 
   return (
-    <form onSubmit={submit} style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-      <input placeholder="Candidate name" value={name} onChange={(e) => setName(e.target.value)} style={{ padding: 8, borderRadius: 6 }} />
-      <input type="email" placeholder="Email (required)" value={email} onChange={(e) => setEmail(e.target.value)} style={{ padding: 8, borderRadius: 6 }} />
-      <select value={stage} onChange={(e) => setStage(e.target.value)} style={{ padding: 8, borderRadius: 6 }}>
+    <form onSubmit={submit} className="flex gap-2 items-start flex-wrap">
+      <Input
+        placeholder="Candidate name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="w-48"
+      />
+      <Input
+        type="email"
+        placeholder="Email (required)"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="w-56"
+      />
+      <select 
+        value={stage} 
+        onChange={(e) => setStage(e.target.value)} 
+        className="h-10 w-40 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      >
         {CANDIDATE_STAGES.map((s) => (
           <option key={s} value={s}>{s}</option>
         ))}
       </select>
-      <button type="submit" style={{ padding: '8px 12px', borderRadius: 6 }}>Add Candidate</button>
-      {error && <span style={{ color: 'red' }}>{error}</span>}
+      <Button type="submit" size="default">
+        <UserPlus className="h-4 w-4 mr-2" />
+        Add Candidate
+      </Button>
+      {error && <span className="text-sm text-destructive w-full">{error}</span>}
     </form>
   )
 }
