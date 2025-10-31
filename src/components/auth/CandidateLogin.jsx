@@ -12,19 +12,6 @@ export default function CandidateLogin() {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  // Show a one-time guidance alert when arriving at Candidate Login
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Clear any previous candidate session so a failed login can't piggyback on a stale session
-      try { localStorage.removeItem('candidate_session') } catch {}
-      const key = 'candidate_login_hint_shown'
-      if (!sessionStorage.getItem(key)) {
-        alert('For login credentials, go to HR portal → add candidate → open candidate profile → Send invite → login with the credentials received on mail.')
-        sessionStorage.setItem(key, '1')
-      }
-    }
-  }, [])
-
   async function submit(e) {
     e && e.preventDefault()
     setError('')
